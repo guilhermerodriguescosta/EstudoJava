@@ -1,8 +1,7 @@
-package br.com.guilhermecosta.helloworld;
+package br.com.guilhermecosta.helloworld.exception;
 
 import java.util.Map;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -23,13 +22,13 @@ public class ApiExceptionHandler {
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<Map<String, String>> tratarParametroInvalido(
             MethodArgumentTypeMismatchException exception) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+        return ResponseEntity.badRequest().body(Map.of(
                 "erro", "Parâmetro inválido",
-                "mensagem", "O parâmetro '" + exception.getName() + "' deve ser um número inteiro."));
+                "mensagem", "O parâmetro '" + exception.getName() + "' possui um valor inválido."));
     }
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<Map<String, String>> tratarOperacaoInvalida(IllegalArgumentException exception) {
+    @ExceptionHandler(DivisaoPorZeroException.class)
+    public ResponseEntity<Map<String, String>> tratarDivisaoPorZero(DivisaoPorZeroException exception) {
         return ResponseEntity.badRequest().body(Map.of(
                 "erro", "Operação inválida",
                 "mensagem", exception.getMessage()));
