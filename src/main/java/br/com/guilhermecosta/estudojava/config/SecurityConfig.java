@@ -17,6 +17,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(HttpMethod.DELETE, "/historico/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/historico/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/historico").authenticated()
                         .anyRequest().permitAll())
                 .httpBasic(basic -> {})

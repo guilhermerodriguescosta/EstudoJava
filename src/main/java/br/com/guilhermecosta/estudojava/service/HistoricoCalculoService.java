@@ -41,6 +41,31 @@ public class HistoricoCalculoService {
         return Optional.ofNullable(calculos.get(id));
     }
 
+    public Optional<CalculoSalvo> atualizar(long id, ResultadoOperacao resultado) {
+        if (!calculos.containsKey(id)) {
+            return Optional.empty();
+        }
+
+        boolean calculoJaExiste = calculos.entrySet().stream().anyMatch(entrada ->
+                entrada.getKey() != id
+                        && entrada.getValue().numero1() == resultado.numero1()
+                        && entrada.getValue().numero2() == resultado.numero2()
+                        && entrada.getValue().operacao() == resultado.operacao());
+
+        if (calculoJaExiste) {
+            throw new CalculoDuplicadoException();
+        }
+
+        CalculoSalvo calculoAtualizado = new CalculoSalvo(
+                id,
+                resultado.numero1(),
+                resultado.numero2(),
+                resultado.operacao(),
+                resultado.resultado());
+        calculos.put(id, calculoAtualizado);
+        return Optional.of(calculoAtualizado);
+    }
+
     public boolean removerPorId(long id) {
         return calculos.remove(id) != null;
     }

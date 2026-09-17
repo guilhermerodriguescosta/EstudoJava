@@ -3,6 +3,7 @@ package br.com.guilhermecosta.estudojava;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
@@ -65,6 +66,23 @@ class EstudoJavaApplicationTests {
     @Test void deveRetornarForbiddenAoExcluirComoUsuarioComum() throws Exception {
         CalculoSalvo calculo = historicoCalculoService.salvar(new ResultadoOperacao(20, 4, Operacao.DIVISAO, 5));
         mockMvc.perform(delete("/historico/{id}", calculo.id()).with(httpBasic("usuario", "123")))
+                .andExpect(status().isForbidden());
+    }
+    @Test void deveAtualizarCalculoComoAdmin() throws Exception {
+        CalculoSalvo calculo = historicoCalculoService.salvar(new ResultadoOperacao(20, 5, Operacao.SOMA, 25));
+        mockMvc.perform(put("/historico/{id}", calculo.id()).with(httpBasic("admin", "123"))
+                .param("numero1", "9").param("numero2", "3").param("operacao", "MULTIPLICACAO"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.id").value(calculo.id()))
+                .andExpect(jsonPath("$.resultado").value(27.0));
+    }
+    @Test void deveRetornarNotFoundAoAtualizarCalculoInexistente() throws Exception {
+        mockMvc.perform(put("/historico/{id}", 99999).with(httpBasic("admin", "123"))
+                .param("numero1", "9").param("numero2", "3").param("operacao", "MULTIPLICACAO"))
+                .andExpect(status().isNotFound());
+    }
+    @Test void deveRetornarForbiddenAoAtualizarComoUsuarioComum() throws Exception {
+        mockMvc.perform(put("/historico/{id}", 1).with(httpBasic("usuario", "123"))
+                .param("numero1", "9").param("numero2", "3").param("operacao", "MULTIPLICACAO"))
                 .andExpect(status().isForbidden());
     }
 }

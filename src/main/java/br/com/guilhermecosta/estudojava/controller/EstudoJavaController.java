@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import br.com.guilhermecosta.estudojava.model.CalculoSalvo;
@@ -40,6 +41,11 @@ public class EstudoJavaController {
     @GetMapping("/historico/{id}")
     public ResponseEntity<CalculoSalvo> buscarNoHistorico(@PathVariable long id) {
         return historicoCalculoService.buscarPorId(id).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+    @PutMapping("/historico/{id}")
+    public ResponseEntity<CalculoSalvo> atualizarNoHistorico(@PathVariable long id, @RequestParam double numero1, @RequestParam double numero2, @RequestParam Operacao operacao) {
+        ResultadoOperacao resultado = executarOperacao(numero1, numero2, operacao);
+        return historicoCalculoService.atualizar(id, resultado).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
     @DeleteMapping("/historico/{id}")
     public ResponseEntity<Void> removerDoHistorico(@PathVariable long id) {

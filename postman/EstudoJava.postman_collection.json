@@ -98,6 +98,19 @@
           ] } }]
         },
         {
+          "name": "Editar cálculo como usuário comum - 403 Forbidden",
+          "request": { "method": "PUT", "header": [], "auth": { "type": "basic", "basic": [{ "key": "username", "value": "usuario", "type": "string" }, { "key": "password", "value": "123", "type": "string" }] }, "url": "{{baseUrl}}/historico/{{calculoId}}?numero1=9&numero2=3&operacao=MULTIPLICACAO" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 403', () => pm.response.to.have.status(403));"] } }]
+        },
+        {
+          "name": "Editar cálculo como admin - 200 OK",
+          "request": { "method": "PUT", "header": [], "auth": { "type": "basic", "basic": [{ "key": "username", "value": "admin", "type": "string" }, { "key": "password", "value": "123", "type": "string" }] }, "url": "{{baseUrl}}/historico/{{calculoId}}?numero1=9&numero2=3&operacao=MULTIPLICACAO" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Status 200', () => pm.response.to.have.status(200));",
+            "pm.test('Resultado atualizado para 27', () => pm.expect(pm.response.json().resultado).to.eql(27));"
+          ] } }]
+        },
+        {
           "name": "Excluir cálculo como usuário comum - 403 Forbidden",
           "request": { "method": "DELETE", "header": [], "auth": { "type": "basic", "basic": [{ "key": "username", "value": "usuario", "type": "string" }, { "key": "password", "value": "123", "type": "string" }] }, "url": "{{baseUrl}}/historico/{{calculoId}}" },
           "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 403', () => pm.response.to.have.status(403));"] } }]
@@ -129,6 +142,16 @@
           "name": "Excluir cálculo sem autenticação - 401 Unauthorized",
           "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/historico/{{calculoId}}" },
           "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 401', () => pm.response.to.have.status(401));"] } }]
+        },
+        {
+          "name": "Editar cálculo sem autenticação - 401 Unauthorized",
+          "request": { "method": "PUT", "header": [], "url": "{{baseUrl}}/historico/{{calculoId}}?numero1=9&numero2=3&operacao=MULTIPLICACAO" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 401', () => pm.response.to.have.status(401));"] } }]
+        },
+        {
+          "name": "Editar cálculo inexistente como admin - 404 Not Found",
+          "request": { "method": "PUT", "header": [], "auth": { "type": "basic", "basic": [{ "key": "username", "value": "admin", "type": "string" }, { "key": "password", "value": "123", "type": "string" }] }, "url": "{{baseUrl}}/historico/99999?numero1=9&numero2=3&operacao=MULTIPLICACAO" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 404', () => pm.response.to.have.status(404));"] } }]
         },
         {
           "name": "Criar cálculo sem autenticação - 401 Unauthorized",
