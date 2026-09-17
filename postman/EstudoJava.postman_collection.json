@@ -82,6 +82,14 @@
           ] } }]
         },
         {
+          "name": "Número fora do limite - 422 Unprocessable Content",
+          "request": { "method": "POST", "header": [], "url": "{{baseUrl}}/historico?numero1=1000001&numero2=2&operacao=SOMA" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Status 422', () => pm.response.to.have.status(422));",
+            "pm.test('Erro informa o limite', () => pm.expect(pm.response.json().erro).to.eql('Número fora do limite'));"
+          ] } }]
+        },
+        {
           "name": "Buscar cálculo criado - 200 OK",
           "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/historico/{{calculoId}}" },
           "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [

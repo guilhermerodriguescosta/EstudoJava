@@ -9,6 +9,10 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
+    @ExceptionHandler(NumeroForaDoLimiteException.class)
+    public ResponseEntity<Map<String, String>> tratarNumeroForaDoLimite(NumeroForaDoLimiteException exception) {
+        return ResponseEntity.unprocessableContent().body(Map.of("erro", "Número fora do limite", "mensagem", exception.getMessage()));
+    }
     @ExceptionHandler(CalculoDuplicadoException.class)
     public ResponseEntity<Map<String, String>> tratarCalculoDuplicado(CalculoDuplicadoException exception) {
         return ResponseEntity.status(409).body(Map.of("erro", "Cálculo duplicado", "mensagem", exception.getMessage()));

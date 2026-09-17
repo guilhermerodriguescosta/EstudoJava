@@ -47,4 +47,11 @@ class EstudoJavaApplicationTests {
         mockMvc.perform(post("/historico").param("numero1", "10").param("numero2", "2").param("operacao", "DIVISAO"))
                 .andExpect(status().isConflict()).andExpect(jsonPath("$.erro").value("Cálculo duplicado"));
     }
+    @Test void deveRetornarNotFoundAoBuscarCalculoInexistente() throws Exception {
+        mockMvc.perform(get("/historico/{id}", 99999)).andExpect(status().isNotFound());
+    }
+    @Test void deveRetornarUnprocessableContentQuandoNumeroPassarDoLimite() throws Exception {
+        mockMvc.perform(post("/historico").param("numero1", "1000001").param("numero2", "2").param("operacao", "SOMA"))
+                .andExpect(status().isUnprocessableContent()).andExpect(jsonPath("$.erro").value("Número fora do limite"));
+    }
 }

@@ -12,11 +12,13 @@ import org.springframework.web.bind.annotation.RestController;
 import br.com.guilhermecosta.estudojava.model.CalculoSalvo;
 import br.com.guilhermecosta.estudojava.model.Operacao;
 import br.com.guilhermecosta.estudojava.model.ResultadoOperacao;
+import br.com.guilhermecosta.estudojava.exception.NumeroForaDoLimiteException;
 import br.com.guilhermecosta.estudojava.service.Calculadora;
 import br.com.guilhermecosta.estudojava.service.HistoricoCalculoService;
 
 @RestController
 public class EstudoJavaController {
+    private static final double LIMITE_NUMERO = 1_000_000;
     private final Calculadora calculadora;
     private final HistoricoCalculoService historicoCalculoService;
 
@@ -46,7 +48,14 @@ public class EstudoJavaController {
                 : ResponseEntity.notFound().build();
     }
     private ResultadoOperacao executarOperacao(double numero1, double numero2, Operacao operacao) {
+        validarLimiteDosNumeros(numero1, numero2);
         double resultado = switch (operacao) { case SOMA -> calculadora.somar(numero1, numero2); case SUBTRACAO -> calculadora.subtrair(numero1, numero2); case MULTIPLICACAO -> calculadora.multiplicar(numero1, numero2); case DIVISAO -> calculadora.dividir(numero1, numero2); };
         return new ResultadoOperacao(numero1, numero2, operacao, resultado);
+    }
+
+    private void validarLimiteDosNumeros(double numero1, double numero2) {
+        if (Math.abs(numero1) > LIMITE_NUMERO || Math.abs(numero2) > LIMITE_NUMERO) {
+            throw new NumeroForaDoLimiteException();
+        }
     }
 }
