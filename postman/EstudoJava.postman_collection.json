@@ -65,7 +65,7 @@
       "item": [
         {
           "name": "Criar cálculo no histórico - 201 Created",
-          "request": { "method": "POST", "header": [], "url": "{{baseUrl}}/historico?numero1=10&numero2=2&operacao=DIVISAO" },
+          "request": { "method": "POST", "header": [], "auth": { "type": "basic", "basic": [{ "key": "username", "value": "usuario", "type": "string" }, { "key": "password", "value": "123", "type": "string" }] }, "url": "{{baseUrl}}/historico?numero1=10&numero2=2&operacao=DIVISAO" },
           "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
             "pm.test('Status 201', () => pm.response.to.have.status(201));",
             "pm.test('Location aponta para o cálculo criado', () => pm.expect(pm.response.headers.get('Location')).to.include('/historico/'));",
@@ -75,7 +75,7 @@
         },
         {
           "name": "Criar cálculo duplicado - 409 Conflict",
-          "request": { "method": "POST", "header": [], "url": "{{baseUrl}}/historico?numero1=10&numero2=2&operacao=DIVISAO" },
+          "request": { "method": "POST", "header": [], "auth": { "type": "basic", "basic": [{ "key": "username", "value": "usuario", "type": "string" }, { "key": "password", "value": "123", "type": "string" }] }, "url": "{{baseUrl}}/historico?numero1=10&numero2=2&operacao=DIVISAO" },
           "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
             "pm.test('Status 409', () => pm.response.to.have.status(409));",
             "pm.test('Erro informa cálculo duplicado', () => pm.expect(pm.response.json().erro).to.eql('Cálculo duplicado'));"
@@ -83,7 +83,7 @@
         },
         {
           "name": "Número fora do limite - 422 Unprocessable Content",
-          "request": { "method": "POST", "header": [], "url": "{{baseUrl}}/historico?numero1=1000001&numero2=2&operacao=SOMA" },
+          "request": { "method": "POST", "header": [], "auth": { "type": "basic", "basic": [{ "key": "username", "value": "usuario", "type": "string" }, { "key": "password", "value": "123", "type": "string" }] }, "url": "{{baseUrl}}/historico?numero1=1000001&numero2=2&operacao=SOMA" },
           "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
             "pm.test('Status 422', () => pm.response.to.have.status(422));",
             "pm.test('Erro informa o limite', () => pm.expect(pm.response.json().erro).to.eql('Número fora do limite'));"
@@ -120,6 +120,11 @@
     {
       "name": "Cenários de erro",
       "item": [
+        {
+          "name": "Criar cálculo sem autenticação - 401 Unauthorized",
+          "request": { "method": "POST", "header": [], "url": "{{baseUrl}}/historico?numero1=7&numero2=3&operacao=SOMA" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 401', () => pm.response.to.have.status(401));"] } }]
+        },
         {
           "name": "Parâmetro obrigatório ausente",
           "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/somar?numero1=10" },

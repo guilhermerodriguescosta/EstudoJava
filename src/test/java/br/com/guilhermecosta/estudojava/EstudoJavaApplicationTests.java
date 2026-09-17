@@ -5,6 +5,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -42,16 +43,20 @@ class EstudoJavaApplicationTests {
         mockMvc.perform(delete("/historico/{id}", calculo.id())).andExpect(status().isNotFound());
     }
     @Test void deveRetornarConflictAoSalvarCalculoDuplicado() throws Exception {
-        mockMvc.perform(post("/historico").param("numero1", "10").param("numero2", "2").param("operacao", "DIVISAO"))
+        mockMvc.perform(post("/historico").with(httpBasic("usuario", "123")).param("numero1", "10").param("numero2", "2").param("operacao", "DIVISAO"))
                 .andExpect(status().isCreated());
-        mockMvc.perform(post("/historico").param("numero1", "10").param("numero2", "2").param("operacao", "DIVISAO"))
+        mockMvc.perform(post("/historico").with(httpBasic("usuario", "123")).param("numero1", "10").param("numero2", "2").param("operacao", "DIVISAO"))
                 .andExpect(status().isConflict()).andExpect(jsonPath("$.erro").value("Cálculo duplicado"));
     }
     @Test void deveRetornarNotFoundAoBuscarCalculoInexistente() throws Exception {
         mockMvc.perform(get("/historico/{id}", 99999)).andExpect(status().isNotFound());
     }
     @Test void deveRetornarUnprocessableContentQuandoNumeroPassarDoLimite() throws Exception {
-        mockMvc.perform(post("/historico").param("numero1", "1000001").param("numero2", "2").param("operacao", "SOMA"))
+        mockMvc.perform(post("/historico").with(httpBasic("usuario", "123")).param("numero1", "1000001").param("numero2", "2").param("operacao", "SOMA"))
                 .andExpect(status().isUnprocessableContent()).andExpect(jsonPath("$.erro").value("Número fora do limite"));
+    }
+    @Test void deveRetornarUnauthorizedAoCriarCalculoSemAutenticacao() throws Exception {
+        mockMvc.perform(post("/historico").param("numero1", "2").param("numero2", "3").param("operacao", "SOMA"))
+                .andExpect(status().isUnauthorized());
     }
 }
