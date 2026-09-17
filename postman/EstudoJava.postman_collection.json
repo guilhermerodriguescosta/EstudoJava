@@ -12,6 +12,10 @@
     {
       "key": "calculoId",
       "value": "1"
+    },
+    {
+      "key": "pedidoId",
+      "value": ""
     }
   ],
   "item": [
@@ -30,7 +34,31 @@
             "script": {
               "type": "text/javascript",
               "exec": [
-                "pm.test('Status 202', () => pm.response.to.have.status(202));"
+                "pm.test('Status 202', () => pm.response.to.have.status(202));",
+                "pm.test('Confirmação de recebimento', () => pm.expect(pm.response.json().mensagem).to.eql('Pedido recebido e enviado para processamento.'));",
+                "pm.test('Fila correta', () => pm.expect(pm.response.json().fila).to.eql('pedidos'));",
+                "pm.test('Pedido inicia como pendente', () => pm.expect(pm.response.json().status).to.eql('PENDING'));",
+                "pm.test('ID do pedido foi gerado', () => pm.expect(pm.response.json().id).to.be.a('string').and.not.empty);",
+                "pm.collectionVariables.set('pedidoId', pm.response.json().id);"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "Consultar status do pedido - 200 OK",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/pedidos/{{pedidoId}}"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                "pm.test('ID corresponde ao pedido enviado', () => pm.expect(pm.response.json().id).to.eql(pm.collectionVariables.get('pedidoId')));",
+                "pm.test('Status valido', () => pm.expect(['PENDING', 'PROCESSED']).to.include(pm.response.json().status));"
               ]
             }
           }]

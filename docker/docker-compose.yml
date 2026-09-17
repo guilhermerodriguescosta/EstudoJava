@@ -6,10 +6,10 @@ services:
     ports:
       - "8080:8080"
     environment:
-      RABBITMQ_HOST: rabbitmq
-      RABBITMQ_PORT: 5672
-      RABBITMQ_USERNAME: app
-      RABBITMQ_PASSWORD: app
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: app
+      SPRING_RABBITMQ_PASSWORD: app
     depends_on:
       rabbitmq:
         condition: service_healthy

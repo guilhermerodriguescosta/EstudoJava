@@ -1,52 +1,40 @@
 package endpoint.service;
 
-import com.rabbitmq.client.AMQP;
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.ConnectionFactory;
-import org.springframework.beans.factory.annotation.Value;
+import endpoint.config.RabbitMqConfig;
+import endpoint.model.PedidoMensagem;
+import endpoint.model.PedidoStatus;
+import endpoint.model.PedidoStatusResponse;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.concurrent.TimeoutException;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 @Service
 public class PedidoFilaService {
 
-    private static final String FILA_PEDIDOS = "pedidos";
-    private static final AMQP.BasicProperties MENSAGEM_PERSISTENTE =
-            new AMQP.BasicProperties.Builder().deliveryMode(2).build();
+    private final RabbitTemplate rabbitTemplate;
+    private final ConcurrentMap<UUID, PedidoStatusResponse> pedidos = new ConcurrentHashMap<>();
 
-    private final String host;
-    private final int porta;
-    private final String usuario;
-    private final String senha;
-
-    public PedidoFilaService(
-            @Value("${rabbitmq.host}") String host,
-            @Value("${rabbitmq.port}") int porta,
-            @Value("${rabbitmq.username}") String usuario,
-            @Value("${rabbitmq.password}") String senha) {
-        this.host = host;
-        this.porta = porta;
-        this.usuario = usuario;
-        this.senha = senha;
+    public PedidoFilaService(RabbitTemplate rabbitTemplate) {
+        this.rabbitTemplate = rabbitTemplate;
     }
 
-    public void enviar(String descricao) {
-        ConnectionFactory factory = new ConnectionFactory();
-        factory.setHost(host);
-        factory.setPort(porta);
-        factory.setUsername(usuario);
-        factory.setPassword(senha);
+    public UUID enviar(String descricao) {
+        UUID id = UUID.randomUUID();
+        pedidos.put(id, new PedidoStatusResponse(id, descricao, PedidoStatus.PENDING));
+        rabbitTemplate.convertAndSend(RabbitMqConfig.FILA_PEDIDOS, new PedidoMensagem(id, descricao));
+        return id;
+    }
 
-        try (Connection connection = factory.newConnection();
-             Channel channel = connection.createChannel()) {
-            channel.queueDeclare(FILA_PEDIDOS, true, false, false, null);
-            channel.basicPublish("", FILA_PEDIDOS, MENSAGEM_PERSISTENTE, descricao.getBytes(StandardCharsets.UTF_8));
-        } catch (IOException | TimeoutException exception) {
-            throw new IllegalStateException("Não foi possível enviar o pedido para o RabbitMQ.", exception);
-        }
+    public Optional<PedidoStatusResponse> buscarPorId(UUID id) {
+        return Optional.ofNullable(pedidos.get(id));
+    }
+
+    public void marcarComoProcessado(UUID id) {
+        pedidos.computeIfPresent(id, (chave, pedido) -> new PedidoStatusResponse(
+                pedido.id(), pedido.descricao(), PedidoStatus.PROCESSED));
     }
 }

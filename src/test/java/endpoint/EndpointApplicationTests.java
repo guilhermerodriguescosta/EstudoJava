@@ -17,7 +17,7 @@ import endpoint.model.Operacao;
 import endpoint.model.ResultadoOperacao;
 import endpoint.service.HistoricoCalculoService;
 
-@SpringBootTest
+@SpringBootTest(properties = "spring.rabbitmq.listener.simple.auto-startup=false")
 @AutoConfigureMockMvc
 class EndpointApplicationTests {
     @Autowired private MockMvc mockMvc;

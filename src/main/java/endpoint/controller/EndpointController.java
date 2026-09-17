@@ -1,6 +1,7 @@
 package endpoint.controller;
 
 import java.net.URI;
+import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -13,6 +14,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import endpoint.model.CalculoSalvo;
 import endpoint.model.Operacao;
+import endpoint.model.PedidoRecebidoResponse;
+import endpoint.model.PedidoStatus;
+import endpoint.model.PedidoStatusResponse;
 import endpoint.model.ResultadoOperacao;
 import endpoint.exception.NumeroForaDoLimiteException;
 import endpoint.service.Calculadora;
@@ -47,9 +51,22 @@ public class EndpointController {
         return ResponseEntity.created(URI.create("/historico/" + calculoSalvo.id())).body(calculoSalvo);
     }
     @PostMapping("/pedidos")
-    public ResponseEntity<Void> enviarPedido(@RequestParam String descricao) {
-        pedidoFilaService.enviar(descricao);
-        return ResponseEntity.accepted().build();
+    public ResponseEntity<PedidoRecebidoResponse> enviarPedido(@RequestParam String descricao) {
+        UUID id = pedidoFilaService.enviar(descricao);
+        PedidoRecebidoResponse resposta = new PedidoRecebidoResponse(
+                id,
+                "Pedido recebido e enviado para processamento.",
+                "pedidos",
+                descricao,
+                PedidoStatus.PENDING
+        );
+        return ResponseEntity.accepted().body(resposta);
+    }
+    @GetMapping("/pedidos/{id}")
+    public ResponseEntity<PedidoStatusResponse> buscarPedido(@PathVariable UUID id) {
+        return pedidoFilaService.buscarPorId(id)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
     @GetMapping("/historico/{id}")
     public ResponseEntity<CalculoSalvo> buscarNoHistorico(@PathVariable long id) {
