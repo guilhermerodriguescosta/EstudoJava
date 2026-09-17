@@ -3,6 +3,7 @@ package br.com.guilhermecosta.estudojava.controller;
 import java.net.URI;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -37,6 +38,12 @@ public class EstudoJavaController {
     @GetMapping("/historico/{id}")
     public ResponseEntity<CalculoSalvo> buscarNoHistorico(@PathVariable long id) {
         return historicoCalculoService.buscarPorId(id).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+    @DeleteMapping("/historico/{id}")
+    public ResponseEntity<Void> removerDoHistorico(@PathVariable long id) {
+        return historicoCalculoService.removerPorId(id)
+                ? ResponseEntity.noContent().build()
+                : ResponseEntity.notFound().build();
     }
     private ResultadoOperacao executarOperacao(double numero1, double numero2, Operacao operacao) {
         double resultado = switch (operacao) { case SOMA -> calculadora.somar(numero1, numero2); case SUBTRACAO -> calculadora.subtrair(numero1, numero2); case MULTIPLICACAO -> calculadora.multiplicar(numero1, numero2); case DIVISAO -> calculadora.dividir(numero1, numero2); };

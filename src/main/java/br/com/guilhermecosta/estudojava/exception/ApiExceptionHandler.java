@@ -9,6 +9,10 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
+    @ExceptionHandler(CalculoDuplicadoException.class)
+    public ResponseEntity<Map<String, String>> tratarCalculoDuplicado(CalculoDuplicadoException exception) {
+        return ResponseEntity.status(409).body(Map.of("erro", "Cálculo duplicado", "mensagem", exception.getMessage()));
+    }
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<Map<String, String>> tratarParametroAusente(MissingServletRequestParameterException exception) {
         return ResponseEntity.badRequest().body(Map.of("erro", "Parâmetro obrigatório ausente", "mensagem", "O parâmetro '" + exception.getParameterName() + "' é obrigatório."));

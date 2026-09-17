@@ -74,12 +74,33 @@
           ] } }]
         },
         {
+          "name": "Criar cálculo duplicado - 409 Conflict",
+          "request": { "method": "POST", "header": [], "url": "{{baseUrl}}/historico?numero1=10&numero2=2&operacao=DIVISAO" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Status 409', () => pm.response.to.have.status(409));",
+            "pm.test('Erro informa cálculo duplicado', () => pm.expect(pm.response.json().erro).to.eql('Cálculo duplicado'));"
+          ] } }]
+        },
+        {
           "name": "Buscar cálculo criado - 200 OK",
           "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/historico/{{calculoId}}" },
           "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
             "pm.test('Status 200', () => pm.response.to.have.status(200));",
             "pm.test('ID é o mesmo cálculo criado', () => pm.expect(pm.response.json().id).to.eql(Number(pm.collectionVariables.get('calculoId'))));"
           ] } }]
+        },
+        {
+          "name": "Excluir cálculo criado - 204 No Content",
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/historico/{{calculoId}}" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Status 204', () => pm.response.to.have.status(204));",
+            "pm.test('Resposta não possui corpo', () => pm.expect(pm.response.text()).to.eql(''));"
+          ] } }]
+        },
+        {
+          "name": "Excluir cálculo já removido - 404 Not Found",
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/historico/{{calculoId}}" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 404', () => pm.response.to.have.status(404));"] } }]
         },
         {
           "name": "Buscar cálculo inexistente - 404 Not Found",
