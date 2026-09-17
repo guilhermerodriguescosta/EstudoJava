@@ -1,22 +1,43 @@
 package br.com.guilhermecosta.estudojava.controller;
 
+import java.net.URI;
+
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import br.com.guilhermecosta.estudojava.model.CalculoSalvo;
 import br.com.guilhermecosta.estudojava.model.Operacao;
 import br.com.guilhermecosta.estudojava.model.ResultadoOperacao;
 import br.com.guilhermecosta.estudojava.service.Calculadora;
+import br.com.guilhermecosta.estudojava.service.HistoricoCalculoService;
 
 @RestController
 public class EstudoJavaController {
     private final Calculadora calculadora;
-    public EstudoJavaController(Calculadora calculadora) { this.calculadora = calculadora; }
+    private final HistoricoCalculoService historicoCalculoService;
+
+    public EstudoJavaController(Calculadora calculadora, HistoricoCalculoService historicoCalculoService) {
+        this.calculadora = calculadora;
+        this.historicoCalculoService = historicoCalculoService;
+    }
     @GetMapping("/hello") public String hello() { return "Hello World"; }
     @GetMapping("/somar") public ResultadoOperacao somar(@RequestParam double numero1, @RequestParam double numero2) { return executarOperacao(numero1, numero2, Operacao.SOMA); }
     @GetMapping("/subtrair") public ResultadoOperacao subtrair(@RequestParam double numero1, @RequestParam double numero2) { return executarOperacao(numero1, numero2, Operacao.SUBTRACAO); }
     @GetMapping("/multiplicar") public ResultadoOperacao multiplicar(@RequestParam double numero1, @RequestParam double numero2) { return executarOperacao(numero1, numero2, Operacao.MULTIPLICACAO); }
     @GetMapping("/dividir") public ResultadoOperacao dividir(@RequestParam double numero1, @RequestParam double numero2) { return executarOperacao(numero1, numero2, Operacao.DIVISAO); }
     @GetMapping("/calcular") public ResultadoOperacao calcular(@RequestParam double numero1, @RequestParam double numero2, @RequestParam Operacao operacao) { return executarOperacao(numero1, numero2, operacao); }
+    @PostMapping("/historico")
+    public ResponseEntity<CalculoSalvo> salvarNoHistorico(@RequestParam double numero1, @RequestParam double numero2, @RequestParam Operacao operacao) {
+        CalculoSalvo calculoSalvo = historicoCalculoService.salvar(executarOperacao(numero1, numero2, operacao));
+        return ResponseEntity.created(URI.create("/historico/" + calculoSalvo.id())).body(calculoSalvo);
+    }
+    @GetMapping("/historico/{id}")
+    public ResponseEntity<CalculoSalvo> buscarNoHistorico(@PathVariable long id) {
+        return historicoCalculoService.buscarPorId(id).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
     private ResultadoOperacao executarOperacao(double numero1, double numero2, Operacao operacao) {
         double resultado = switch (operacao) { case SOMA -> calculadora.somar(numero1, numero2); case SUBTRACAO -> calculadora.subtrair(numero1, numero2); case MULTIPLICACAO -> calculadora.multiplicar(numero1, numero2); case DIVISAO -> calculadora.dividir(numero1, numero2); };
         return new ResultadoOperacao(numero1, numero2, operacao, resultado);
