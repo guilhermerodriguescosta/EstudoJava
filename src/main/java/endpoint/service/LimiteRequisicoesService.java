@@ -1,4 +1,4 @@
-package br.com.guilhermecosta.estudojava.service;
+package endpoint.service;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -7,7 +7,7 @@ import java.util.Deque;
 
 import org.springframework.stereotype.Service;
 
-import br.com.guilhermecosta.estudojava.exception.LimiteRequisicoesExcedidoException;
+import endpoint.exception.LimiteRequisicoesExcedidoException;
 
 @Service
 public class LimiteRequisicoesService {

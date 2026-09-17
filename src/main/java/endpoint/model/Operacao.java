@@ -1,3 +1,3 @@
-package br.com.guilhermecosta.estudojava.model;
+package endpoint.model;
 
 public enum Operacao { SOMA, SUBTRACAO, MULTIPLICACAO, DIVISAO }

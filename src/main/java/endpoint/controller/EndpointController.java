@@ -1,4 +1,4 @@
-package br.com.guilhermecosta.estudojava.controller;
+package endpoint.controller;
 
 import java.net.URI;
 
@@ -11,25 +11,28 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import br.com.guilhermecosta.estudojava.model.CalculoSalvo;
-import br.com.guilhermecosta.estudojava.model.Operacao;
-import br.com.guilhermecosta.estudojava.model.ResultadoOperacao;
-import br.com.guilhermecosta.estudojava.exception.NumeroForaDoLimiteException;
-import br.com.guilhermecosta.estudojava.service.Calculadora;
-import br.com.guilhermecosta.estudojava.service.HistoricoCalculoService;
-import br.com.guilhermecosta.estudojava.service.LimiteRequisicoesService;
+import endpoint.model.CalculoSalvo;
+import endpoint.model.Operacao;
+import endpoint.model.ResultadoOperacao;
+import endpoint.exception.NumeroForaDoLimiteException;
+import endpoint.service.Calculadora;
+import endpoint.service.HistoricoCalculoService;
+import endpoint.service.LimiteRequisicoesService;
+import endpoint.service.PedidoFilaService;
 
 @RestController
-public class EstudoJavaController {
+public class EndpointController {
     private static final double LIMITE_NUMERO = 1_000_000;
     private final Calculadora calculadora;
     private final HistoricoCalculoService historicoCalculoService;
     private final LimiteRequisicoesService limiteRequisicoesService;
+    private final PedidoFilaService pedidoFilaService;
 
-    public EstudoJavaController(Calculadora calculadora, HistoricoCalculoService historicoCalculoService, LimiteRequisicoesService limiteRequisicoesService) {
+    public EndpointController(Calculadora calculadora, HistoricoCalculoService historicoCalculoService, LimiteRequisicoesService limiteRequisicoesService, PedidoFilaService pedidoFilaService) {
         this.calculadora = calculadora;
         this.historicoCalculoService = historicoCalculoService;
         this.limiteRequisicoesService = limiteRequisicoesService;
+        this.pedidoFilaService = pedidoFilaService;
     }
     @GetMapping("/hello") public String hello() { return "Hello World"; }
     @GetMapping("/somar") public ResultadoOperacao somar(@RequestParam double numero1, @RequestParam double numero2) { return executarOperacao(numero1, numero2, Operacao.SOMA); }
@@ -42,6 +45,11 @@ public class EstudoJavaController {
         limiteRequisicoesService.validarCriacao(authentication.getName());
         CalculoSalvo calculoSalvo = historicoCalculoService.salvar(executarOperacao(numero1, numero2, operacao));
         return ResponseEntity.created(URI.create("/historico/" + calculoSalvo.id())).body(calculoSalvo);
+    }
+    @PostMapping("/pedidos")
+    public ResponseEntity<Void> enviarPedido(@RequestParam String descricao) {
+        pedidoFilaService.enviar(descricao);
+        return ResponseEntity.accepted().build();
     }
     @GetMapping("/historico/{id}")
     public ResponseEntity<CalculoSalvo> buscarNoHistorico(@PathVariable long id) {

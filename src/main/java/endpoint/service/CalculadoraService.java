@@ -1,7 +1,7 @@
-package br.com.guilhermecosta.estudojava.service;
+package endpoint.service;
 
 import org.springframework.stereotype.Service;
-import br.com.guilhermecosta.estudojava.exception.DivisaoPorZeroException;
+import endpoint.exception.DivisaoPorZeroException;
 
 @Service
 public class CalculadoraService implements Calculadora {

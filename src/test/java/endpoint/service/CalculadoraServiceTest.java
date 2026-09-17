@@ -1,9 +1,9 @@
-package br.com.guilhermecosta.estudojava.service;
+package endpoint.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.Test;
-import br.com.guilhermecosta.estudojava.exception.DivisaoPorZeroException;
+import endpoint.exception.DivisaoPorZeroException;
 
 class CalculadoraServiceTest {
     private final CalculadoraService calculadora = new CalculadoraService();

@@ -1,4 +1,4 @@
-package br.com.guilhermecosta.estudojava.exception;
+package endpoint.exception;
 
 public class CalculoDuplicadoException extends RuntimeException {
     public CalculoDuplicadoException() {

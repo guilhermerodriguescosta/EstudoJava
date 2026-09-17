@@ -1,11 +1,11 @@
-package br.com.guilhermecosta.estudojava;
+package endpoint;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class EstudoJavaApplication {
+public class EndpointApplication {
     public static void main(String[] args) {
-        SpringApplication.run(EstudoJavaApplication.class, args);
+        SpringApplication.run(EndpointApplication.class, args);
     }
 }

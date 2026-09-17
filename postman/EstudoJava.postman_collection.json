@@ -16,6 +16,28 @@
   ],
   "item": [
     {
+      "name": "RabbitMQ",
+      "item": [
+        {
+          "name": "Enviar pedido - 202 Accepted",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/pedidos?descricao=Pedido%20via%20Postman"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('Status 202', () => pm.response.to.have.status(202));"
+              ]
+            }
+          }]
+        }
+      ]
+    },
+    {
       "name": "Hello World",
       "request": {
         "method": "GET",

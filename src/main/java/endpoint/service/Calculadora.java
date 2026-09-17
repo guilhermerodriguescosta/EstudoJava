@@ -1,4 +1,4 @@
-package br.com.guilhermecosta.estudojava.service;
+package endpoint.service;
 
 public interface Calculadora {
     double somar(double numero1, double numero2);

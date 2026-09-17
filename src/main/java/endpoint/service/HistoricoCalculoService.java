@@ -1,4 +1,4 @@
-package br.com.guilhermecosta.estudojava.service;
+package endpoint.service;
 
 import java.util.Map;
 import java.util.Optional;
@@ -7,9 +7,9 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.springframework.stereotype.Service;
 
-import br.com.guilhermecosta.estudojava.exception.CalculoDuplicadoException;
-import br.com.guilhermecosta.estudojava.model.CalculoSalvo;
-import br.com.guilhermecosta.estudojava.model.ResultadoOperacao;
+import endpoint.exception.CalculoDuplicadoException;
+import endpoint.model.CalculoSalvo;
+import endpoint.model.ResultadoOperacao;
 
 @Service
 public class HistoricoCalculoService {

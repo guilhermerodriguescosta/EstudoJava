@@ -1,4 +1,4 @@
-package br.com.guilhermecosta.estudojava.exception;
+package endpoint.exception;
 
 import java.util.Map;
 import org.springframework.http.ResponseEntity;

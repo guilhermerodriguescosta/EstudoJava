@@ -1,4 +1,4 @@
-package br.com.guilhermecosta.estudojava;
+package endpoint;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -12,14 +12,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.web.servlet.MockMvc;
-import br.com.guilhermecosta.estudojava.model.CalculoSalvo;
-import br.com.guilhermecosta.estudojava.model.Operacao;
-import br.com.guilhermecosta.estudojava.model.ResultadoOperacao;
-import br.com.guilhermecosta.estudojava.service.HistoricoCalculoService;
+import endpoint.model.CalculoSalvo;
+import endpoint.model.Operacao;
+import endpoint.model.ResultadoOperacao;
+import endpoint.service.HistoricoCalculoService;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class EstudoJavaApplicationTests {
+class EndpointApplicationTests {
     @Autowired private MockMvc mockMvc;
     @Autowired private HistoricoCalculoService historicoCalculoService;
     @Test void contextLoads() { }
