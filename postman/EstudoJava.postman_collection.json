@@ -136,6 +136,34 @@
       ]
     },
     {
+      "name": "Limite de requisições - 429",
+      "item": [
+        {
+          "name": "Criação 1 como usuário limitado - 201 Created",
+          "request": { "method": "POST", "header": [], "auth": { "type": "basic", "basic": [{ "key": "username", "value": "limitado", "type": "string" }, { "key": "password", "value": "123", "type": "string" }] }, "url": "{{baseUrl}}/historico?numero1=301&numero2=2&operacao=SOMA" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 201', () => pm.response.to.have.status(201));"] } }]
+        },
+        {
+          "name": "Criação 2 como usuário limitado - 201 Created",
+          "request": { "method": "POST", "header": [], "auth": { "type": "basic", "basic": [{ "key": "username", "value": "limitado", "type": "string" }, { "key": "password", "value": "123", "type": "string" }] }, "url": "{{baseUrl}}/historico?numero1=302&numero2=2&operacao=SOMA" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 201', () => pm.response.to.have.status(201));"] } }]
+        },
+        {
+          "name": "Criação 3 como usuário limitado - 201 Created",
+          "request": { "method": "POST", "header": [], "auth": { "type": "basic", "basic": [{ "key": "username", "value": "limitado", "type": "string" }, { "key": "password", "value": "123", "type": "string" }] }, "url": "{{baseUrl}}/historico?numero1=303&numero2=2&operacao=SOMA" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 201', () => pm.response.to.have.status(201));"] } }]
+        },
+        {
+          "name": "Criação 4 excede o limite - 429 Too Many Requests",
+          "request": { "method": "POST", "header": [], "auth": { "type": "basic", "basic": [{ "key": "username", "value": "limitado", "type": "string" }, { "key": "password", "value": "123", "type": "string" }] }, "url": "{{baseUrl}}/historico?numero1=304&numero2=2&operacao=SOMA" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Status 429', () => pm.response.to.have.status(429));",
+            "pm.test('Retry-After é 60 segundos', () => pm.expect(pm.response.headers.get('Retry-After')).to.eql('60'));"
+          ] } }]
+        }
+      ]
+    },
+    {
       "name": "Cenários de erro",
       "item": [
         {

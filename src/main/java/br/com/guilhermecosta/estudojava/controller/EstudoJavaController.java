@@ -3,6 +3,7 @@ package br.com.guilhermecosta.estudojava.controller;
 import java.net.URI;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,16 +17,19 @@ import br.com.guilhermecosta.estudojava.model.ResultadoOperacao;
 import br.com.guilhermecosta.estudojava.exception.NumeroForaDoLimiteException;
 import br.com.guilhermecosta.estudojava.service.Calculadora;
 import br.com.guilhermecosta.estudojava.service.HistoricoCalculoService;
+import br.com.guilhermecosta.estudojava.service.LimiteRequisicoesService;
 
 @RestController
 public class EstudoJavaController {
     private static final double LIMITE_NUMERO = 1_000_000;
     private final Calculadora calculadora;
     private final HistoricoCalculoService historicoCalculoService;
+    private final LimiteRequisicoesService limiteRequisicoesService;
 
-    public EstudoJavaController(Calculadora calculadora, HistoricoCalculoService historicoCalculoService) {
+    public EstudoJavaController(Calculadora calculadora, HistoricoCalculoService historicoCalculoService, LimiteRequisicoesService limiteRequisicoesService) {
         this.calculadora = calculadora;
         this.historicoCalculoService = historicoCalculoService;
+        this.limiteRequisicoesService = limiteRequisicoesService;
     }
     @GetMapping("/hello") public String hello() { return "Hello World"; }
     @GetMapping("/somar") public ResultadoOperacao somar(@RequestParam double numero1, @RequestParam double numero2) { return executarOperacao(numero1, numero2, Operacao.SOMA); }
@@ -34,7 +38,8 @@ public class EstudoJavaController {
     @GetMapping("/dividir") public ResultadoOperacao dividir(@RequestParam double numero1, @RequestParam double numero2) { return executarOperacao(numero1, numero2, Operacao.DIVISAO); }
     @GetMapping("/calcular") public ResultadoOperacao calcular(@RequestParam double numero1, @RequestParam double numero2, @RequestParam Operacao operacao) { return executarOperacao(numero1, numero2, operacao); }
     @PostMapping("/historico")
-    public ResponseEntity<CalculoSalvo> salvarNoHistorico(@RequestParam double numero1, @RequestParam double numero2, @RequestParam Operacao operacao) {
+    public ResponseEntity<CalculoSalvo> salvarNoHistorico(Authentication authentication, @RequestParam double numero1, @RequestParam double numero2, @RequestParam Operacao operacao) {
+        limiteRequisicoesService.validarCriacao(authentication.getName());
         CalculoSalvo calculoSalvo = historicoCalculoService.salvar(executarOperacao(numero1, numero2, operacao));
         return ResponseEntity.created(URI.create("/historico/" + calculoSalvo.id())).body(calculoSalvo);
     }

@@ -85,4 +85,14 @@ class EstudoJavaApplicationTests {
                 .param("numero1", "9").param("numero2", "3").param("operacao", "MULTIPLICACAO"))
                 .andExpect(status().isForbidden());
     }
+    @Test void deveRetornarTooManyRequestsQuandoUsuarioLimitadoPassarDoLimite() throws Exception {
+        for (int numero1 = 301; numero1 <= 303; numero1++) {
+            mockMvc.perform(post("/historico").with(httpBasic("limitado", "123"))
+                    .param("numero1", String.valueOf(numero1)).param("numero2", "2").param("operacao", "SOMA"))
+                    .andExpect(status().isCreated());
+        }
+        mockMvc.perform(post("/historico").with(httpBasic("limitado", "123"))
+                .param("numero1", "304").param("numero2", "2").param("operacao", "SOMA"))
+                .andExpect(status().isTooManyRequests()).andExpect(jsonPath("$.erro").value("Limite de requisições excedido"));
+    }
 }

@@ -9,6 +9,11 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
+    @ExceptionHandler(LimiteRequisicoesExcedidoException.class)
+    public ResponseEntity<Map<String, String>> tratarLimiteRequisicoes(LimiteRequisicoesExcedidoException exception) {
+        return ResponseEntity.status(429).header("Retry-After", "60")
+                .body(Map.of("erro", "Limite de requisições excedido", "mensagem", exception.getMessage()));
+    }
     @ExceptionHandler(NumeroForaDoLimiteException.class)
     public ResponseEntity<Map<String, String>> tratarNumeroForaDoLimite(NumeroForaDoLimiteException exception) {
         return ResponseEntity.unprocessableContent().body(Map.of("erro", "Número fora do limite", "mensagem", exception.getMessage()));

@@ -28,6 +28,7 @@ public class SecurityConfig {
     UserDetailsService usuarios() {
         return new InMemoryUserDetailsManager(
                 User.withUsername("usuario").password("{noop}123").roles("USER").build(),
-                User.withUsername("admin").password("{noop}123").roles("ADMIN").build());
+                User.withUsername("admin").password("{noop}123").roles("ADMIN").build(),
+                User.withUsername("limitado").password("{noop}123").roles("USER").build());
     }
 }
