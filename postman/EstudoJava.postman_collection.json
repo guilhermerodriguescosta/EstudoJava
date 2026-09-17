@@ -1,0 +1,80 @@
+{
+  "info": {
+    "name": "EstudoJava - API Calculadora",
+    "description": "Collection para testar a API local da calculadora.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    }
+  ],
+  "item": [
+    {
+      "name": "Hello World",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/hello"
+      },
+      "event": [{
+        "listen": "test",
+        "script": { "type": "text/javascript", "exec": [
+          "pm.test('Status 200', () => pm.response.to.have.status(200));",
+          "pm.test('Mensagem correta', () => pm.expect(pm.response.text()).to.eql('Hello World'));"
+        ] }
+      }]
+    },
+    {
+      "name": "Operações válidas",
+      "item": [
+        {
+          "name": "Somar",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/somar?numero1=10&numero2=5" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));", "pm.test('Resultado igual a 15', () => pm.expect(pm.response.json().resultado).to.eql(15));"] } }]
+        },
+        {
+          "name": "Subtrair",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/subtrair?numero1=10&numero2=5" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));", "pm.test('Resultado igual a 5', () => pm.expect(pm.response.json().resultado).to.eql(5));"] } }]
+        },
+        {
+          "name": "Multiplicar",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/multiplicar?numero1=10&numero2=5" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));", "pm.test('Resultado igual a 50', () => pm.expect(pm.response.json().resultado).to.eql(50));"] } }]
+        },
+        {
+          "name": "Dividir",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/dividir?numero1=10&numero2=5" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));", "pm.test('Resultado igual a 2', () => pm.expect(pm.response.json().resultado).to.eql(2));"] } }]
+        },
+        {
+          "name": "Calcular multiplicação",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/calcular?numero1=8&numero2=4&operacao=MULTIPLICACAO" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));", "pm.test('Resultado igual a 32', () => pm.expect(pm.response.json().resultado).to.eql(32));"] } }]
+        }
+      ]
+    },
+    {
+      "name": "Cenários de erro",
+      "item": [
+        {
+          "name": "Parâmetro obrigatório ausente",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/somar?numero1=10" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 400', () => pm.response.to.have.status(400));"] } }]
+        },
+        {
+          "name": "Parâmetro inválido",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/somar?numero1=abc&numero2=5" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 400', () => pm.response.to.have.status(400));"] } }]
+        },
+        {
+          "name": "Divisão por zero",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/dividir?numero1=10&numero2=0" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 400', () => pm.response.to.have.status(400));"] } }]
+        }
+      ]
+    }
+  ]
+}
