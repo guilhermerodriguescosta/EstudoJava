@@ -14,18 +14,22 @@ public class ConsumidorPedidos {
     public static void main(String[] args) throws Exception {
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost("localhost");
+        factory.setUsername("app");
+        factory.setPassword("app");
 
         Connection connection = factory.newConnection();
         Channel channel = connection.createChannel();
         channel.queueDeclare(FILA_PEDIDOS, true, false, false, null);
 
-        DeliverCallback processarPedido = (consumerTag, entrega) -> {
-            String pedido = new String(entrega.getBody(), StandardCharsets.UTF_8);
-            System.out.println("Processando: " + pedido);
-            channel.basicAck(entrega.getEnvelope().getDeliveryTag(), false);
-        };
+        DeliverCallback processarPedido = (consumerTag, entrega) -> processarPedido(channel, entrega);
 
         channel.basicConsume(FILA_PEDIDOS, false, processarPedido, consumerTag -> { });
         System.out.println("Consumidor iniciado. Pressione Ctrl+C para encerrar.");
+    }
+
+    static void processarPedido(Channel channel, com.rabbitmq.client.Delivery entrega) throws java.io.IOException {
+        String pedido = new String(entrega.getBody(), StandardCharsets.UTF_8);
+        System.out.println("Processando: " + pedido);
+        channel.basicAck(entrega.getEnvelope().getDeliveryTag(), false);
     }
 }

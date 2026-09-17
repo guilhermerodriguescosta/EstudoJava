@@ -16,6 +16,8 @@ public class ProdutorPedidos {
     public static void main(String[] args) throws Exception {
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost("localhost");
+        factory.setUsername("app");
+        factory.setPassword("app");
 
         try (Connection connection = factory.newConnection();
              Channel channel = connection.createChannel()) {
