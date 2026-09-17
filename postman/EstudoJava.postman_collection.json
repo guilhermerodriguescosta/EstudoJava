@@ -98,8 +98,13 @@
           ] } }]
         },
         {
+          "name": "Excluir cálculo como usuário comum - 403 Forbidden",
+          "request": { "method": "DELETE", "header": [], "auth": { "type": "basic", "basic": [{ "key": "username", "value": "usuario", "type": "string" }, { "key": "password", "value": "123", "type": "string" }] }, "url": "{{baseUrl}}/historico/{{calculoId}}" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 403', () => pm.response.to.have.status(403));"] } }]
+        },
+        {
           "name": "Excluir cálculo criado - 204 No Content",
-          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/historico/{{calculoId}}" },
+          "request": { "method": "DELETE", "header": [], "auth": { "type": "basic", "basic": [{ "key": "username", "value": "admin", "type": "string" }, { "key": "password", "value": "123", "type": "string" }] }, "url": "{{baseUrl}}/historico/{{calculoId}}" },
           "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
             "pm.test('Status 204', () => pm.response.to.have.status(204));",
             "pm.test('Resposta não possui corpo', () => pm.expect(pm.response.text()).to.eql(''));"
@@ -107,7 +112,7 @@
         },
         {
           "name": "Excluir cálculo já removido - 404 Not Found",
-          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/historico/{{calculoId}}" },
+          "request": { "method": "DELETE", "header": [], "auth": { "type": "basic", "basic": [{ "key": "username", "value": "admin", "type": "string" }, { "key": "password", "value": "123", "type": "string" }] }, "url": "{{baseUrl}}/historico/{{calculoId}}" },
           "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 404', () => pm.response.to.have.status(404));"] } }]
         },
         {
@@ -120,6 +125,11 @@
     {
       "name": "Cenários de erro",
       "item": [
+        {
+          "name": "Excluir cálculo sem autenticação - 401 Unauthorized",
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/historico/{{calculoId}}" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 401', () => pm.response.to.have.status(401));"] } }]
+        },
         {
           "name": "Criar cálculo sem autenticação - 401 Unauthorized",
           "request": { "method": "POST", "header": [], "url": "{{baseUrl}}/historico?numero1=7&numero2=3&operacao=SOMA" },

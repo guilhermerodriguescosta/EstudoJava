@@ -39,8 +39,8 @@ class EstudoJavaApplicationTests {
     }
     @Test void deveRemoverCalculoEDepoisRetornarNotFound() throws Exception {
         CalculoSalvo calculo = historicoCalculoService.salvar(new ResultadoOperacao(2, 3, Operacao.SOMA, 5));
-        mockMvc.perform(delete("/historico/{id}", calculo.id())).andExpect(status().isNoContent());
-        mockMvc.perform(delete("/historico/{id}", calculo.id())).andExpect(status().isNotFound());
+        mockMvc.perform(delete("/historico/{id}", calculo.id()).with(httpBasic("admin", "123"))).andExpect(status().isNoContent());
+        mockMvc.perform(delete("/historico/{id}", calculo.id()).with(httpBasic("admin", "123"))).andExpect(status().isNotFound());
     }
     @Test void deveRetornarConflictAoSalvarCalculoDuplicado() throws Exception {
         mockMvc.perform(post("/historico").with(httpBasic("usuario", "123")).param("numero1", "10").param("numero2", "2").param("operacao", "DIVISAO"))
@@ -58,5 +58,13 @@ class EstudoJavaApplicationTests {
     @Test void deveRetornarUnauthorizedAoCriarCalculoSemAutenticacao() throws Exception {
         mockMvc.perform(post("/historico").param("numero1", "2").param("numero2", "3").param("operacao", "SOMA"))
                 .andExpect(status().isUnauthorized());
+    }
+    @Test void deveRetornarUnauthorizedAoExcluirSemAutenticacao() throws Exception {
+        mockMvc.perform(delete("/historico/{id}", 1)).andExpect(status().isUnauthorized());
+    }
+    @Test void deveRetornarForbiddenAoExcluirComoUsuarioComum() throws Exception {
+        CalculoSalvo calculo = historicoCalculoService.salvar(new ResultadoOperacao(20, 4, Operacao.DIVISAO, 5));
+        mockMvc.perform(delete("/historico/{id}", calculo.id()).with(httpBasic("usuario", "123")))
+                .andExpect(status().isForbidden());
     }
 }

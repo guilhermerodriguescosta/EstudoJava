@@ -16,6 +16,7 @@ public class SecurityConfig {
         return http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers(HttpMethod.DELETE, "/historico/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/historico").authenticated()
                         .anyRequest().permitAll())
                 .httpBasic(basic -> {})
@@ -25,6 +26,7 @@ public class SecurityConfig {
     @Bean
     UserDetailsService usuarios() {
         return new InMemoryUserDetailsManager(
-                User.withUsername("usuario").password("{noop}123").roles("USER").build());
+                User.withUsername("usuario").password("{noop}123").roles("USER").build(),
+                User.withUsername("admin").password("{noop}123").roles("ADMIN").build());
     }
 }
