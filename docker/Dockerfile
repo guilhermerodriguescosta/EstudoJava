@@ -18,11 +18,15 @@ FROM eclipse-temurin:25-jre
 # Define /app como a pasta de trabalho da aplicação em execução.
 WORKDIR /app
 
+RUN groupadd --system app && useradd --system --gid app --create-home app
+
 # Copia somente o .jar gerado na etapa "build" e o renomeia para app.jar.
-COPY --from=build /app/target/*.jar app.jar
+COPY --from=build --chown=app:app /app/target/*.jar app.jar
 
 # Documenta que a aplicação aceita conexões na porta 8080.
 EXPOSE 8080
+
+USER app
 
 # Define o comando executado automaticamente quando um container desta imagem é iniciado.
 ENTRYPOINT ["java", "-jar", "app.jar"]

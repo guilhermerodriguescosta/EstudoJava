@@ -28,6 +28,9 @@
 	</scm>
 	<properties>
 		<java.version>25</java.version>
+		<!-- Security overrides for dependencies managed by Spring Boot 4.1.1. -->
+		<rabbit-amqp-client.version>5.36.0</rabbit-amqp-client.version>
+		<tomcat.version>11.0.26</tomcat.version>
 	</properties>
 	<dependencies>
 		<dependency>
