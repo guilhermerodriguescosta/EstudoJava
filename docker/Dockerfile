@@ -18,15 +18,19 @@ FROM eclipse-temurin:25-jre
 # Define /app como a pasta de trabalho da aplicação em execução.
 WORKDIR /app
 
-RUN groupadd --system app && useradd --system --gid app --create-home app
+# Cria uma conta dedicada, sem shell de login e com UID/GID estáveis.
+# Usar identificadores numéricos também evita depender da resolução de nomes no runtime.
+RUN groupadd --system --gid 10001 app \
+    && useradd --system --uid 10001 --gid app --home-dir /app --no-create-home \
+        --shell /usr/sbin/nologin app
 
 # Copia somente o .jar gerado na etapa "build" e o renomeia para app.jar.
-COPY --from=build --chown=app:app /app/target/*.jar app.jar
+COPY --from=build --chown=10001:10001 /app/target/*.jar app.jar
 
 # Documenta que a aplicação aceita conexões na porta 8080.
 EXPOSE 8080
 
-USER app
+USER 10001:10001
 
 # Define o comando executado automaticamente quando um container desta imagem é iniciado.
 ENTRYPOINT ["java", "-jar", "app.jar"]
