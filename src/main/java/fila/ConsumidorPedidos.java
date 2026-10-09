@@ -23,7 +23,8 @@ public class ConsumidorPedidos {
 
         DeliverCallback processarPedido = (consumerTag, entrega) -> processarPedido(channel, entrega);
 
-        channel.basicConsume(FILA_PEDIDOS, false, processarPedido, consumerTag -> { });
+        channel.basicConsume(FILA_PEDIDOS, false, processarPedido, consumerTag -> {
+        });
         System.out.println("Consumidor iniciado. Pressione Ctrl+C para encerrar.");
     }
 

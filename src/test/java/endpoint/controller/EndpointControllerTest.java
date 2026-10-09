@@ -26,12 +26,8 @@ class EndpointControllerTest {
         PedidoFilaService pedidoFilaService = mock(PedidoFilaService.class);
         UUID id = UUID.randomUUID();
         when(pedidoFilaService.enviar("Pedido #8")).thenReturn(id);
-        EndpointController controller = new EndpointController(
-                mock(Calculadora.class),
-                mock(HistoricoCalculoService.class),
-                mock(LimiteRequisicoesService.class),
-                pedidoFilaService
-        );
+        EndpointController controller = new EndpointController(mock(Calculadora.class),
+                mock(HistoricoCalculoService.class), mock(LimiteRequisicoesService.class), pedidoFilaService);
 
         ResponseEntity<PedidoRecebidoResponse> resposta = controller.enviarPedido("Pedido #8");
 
@@ -50,7 +46,8 @@ class EndpointControllerTest {
         UUID id = UUID.randomUUID();
         PedidoStatusResponse pedido = new PedidoStatusResponse(id, "Pedido #10", PedidoStatus.PROCESSED);
         when(pedidoFilaService.buscarPorId(id)).thenReturn(Optional.of(pedido));
-        EndpointController controller = new EndpointController(mock(Calculadora.class), mock(HistoricoCalculoService.class), mock(LimiteRequisicoesService.class), pedidoFilaService);
+        EndpointController controller = new EndpointController(mock(Calculadora.class),
+                mock(HistoricoCalculoService.class), mock(LimiteRequisicoesService.class), pedidoFilaService);
 
         ResponseEntity<PedidoStatusResponse> resposta = controller.buscarPedido(id);
 

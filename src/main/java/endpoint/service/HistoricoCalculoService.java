@@ -17,21 +17,16 @@ public class HistoricoCalculoService {
     private final Map<Long, CalculoSalvo> calculos = new ConcurrentHashMap<>();
 
     public CalculoSalvo salvar(ResultadoOperacao resultado) {
-        boolean calculoJaExiste = calculos.values().stream().anyMatch(calculo ->
-                calculo.numero1() == resultado.numero1()
-                        && calculo.numero2() == resultado.numero2()
-                        && calculo.operacao() == resultado.operacao());
+        boolean calculoJaExiste = calculos.values().stream()
+                .anyMatch(calculo -> calculo.numero1() == resultado.numero1()
+                        && calculo.numero2() == resultado.numero2() && calculo.operacao() == resultado.operacao());
 
         if (calculoJaExiste) {
             throw new CalculoDuplicadoException();
         }
 
         long id = proximoId.getAndIncrement();
-        CalculoSalvo calculo = new CalculoSalvo(
-                id,
-                resultado.numero1(),
-                resultado.numero2(),
-                resultado.operacao(),
+        CalculoSalvo calculo = new CalculoSalvo(id, resultado.numero1(), resultado.numero2(), resultado.operacao(),
                 resultado.resultado());
         calculos.put(id, calculo);
         return calculo;
@@ -46,9 +41,8 @@ public class HistoricoCalculoService {
             return Optional.empty();
         }
 
-        boolean calculoJaExiste = calculos.entrySet().stream().anyMatch(entrada ->
-                entrada.getKey() != id
-                        && entrada.getValue().numero1() == resultado.numero1()
+        boolean calculoJaExiste = calculos.entrySet().stream()
+                .anyMatch(entrada -> entrada.getKey() != id && entrada.getValue().numero1() == resultado.numero1()
                         && entrada.getValue().numero2() == resultado.numero2()
                         && entrada.getValue().operacao() == resultado.operacao());
 
@@ -56,12 +50,8 @@ public class HistoricoCalculoService {
             throw new CalculoDuplicadoException();
         }
 
-        CalculoSalvo calculoAtualizado = new CalculoSalvo(
-                id,
-                resultado.numero1(),
-                resultado.numero2(),
-                resultado.operacao(),
-                resultado.resultado());
+        CalculoSalvo calculoAtualizado = new CalculoSalvo(id, resultado.numero1(), resultado.numero2(),
+                resultado.operacao(), resultado.resultado());
         calculos.put(id, calculoAtualizado);
         return Optional.of(calculoAtualizado);
     }

@@ -34,7 +34,7 @@ public class PedidoFilaService {
     }
 
     public void marcarComoProcessado(UUID id) {
-        pedidos.computeIfPresent(id, (chave, pedido) -> new PedidoStatusResponse(
-                pedido.id(), pedido.descricao(), PedidoStatus.PROCESSED));
+        pedidos.computeIfPresent(id,
+                (chave, pedido) -> new PedidoStatusResponse(pedido.id(), pedido.descricao(), PedidoStatus.PROCESSED));
     }
 }

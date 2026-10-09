@@ -33,11 +33,8 @@ public class EndpointController {
     private final LimiteRequisicoesService limiteRequisicoesService;
     private final PedidoFilaService pedidoFilaService;
 
-    public EndpointController(
-            Calculadora calculadora,
-            HistoricoCalculoService historicoCalculoService,
-            LimiteRequisicoesService limiteRequisicoesService,
-            PedidoFilaService pedidoFilaService) {
+    public EndpointController(Calculadora calculadora, HistoricoCalculoService historicoCalculoService,
+            LimiteRequisicoesService limiteRequisicoesService, PedidoFilaService pedidoFilaService) {
         this.calculadora = calculadora;
         this.historicoCalculoService = historicoCalculoService;
         this.limiteRequisicoesService = limiteRequisicoesService;
@@ -70,19 +67,14 @@ public class EndpointController {
     }
 
     @GetMapping("/calcular")
-    public ResultadoOperacao calcular(
-            @RequestParam double numero1,
-            @RequestParam double numero2,
+    public ResultadoOperacao calcular(@RequestParam double numero1, @RequestParam double numero2,
             @RequestParam Operacao operacao) {
         return executarOperacao(numero1, numero2, operacao);
     }
 
     @PostMapping("/historico")
-    public ResponseEntity<CalculoSalvo> salvarNoHistorico(
-            Authentication authentication,
-            @RequestParam double numero1,
-            @RequestParam double numero2,
-            @RequestParam Operacao operacao) {
+    public ResponseEntity<CalculoSalvo> salvarNoHistorico(Authentication authentication, @RequestParam double numero1,
+            @RequestParam double numero2, @RequestParam Operacao operacao) {
         limiteRequisicoesService.validarCriacao(authentication.getName());
         CalculoSalvo calculoSalvo = historicoCalculoService.salvar(executarOperacao(numero1, numero2, operacao));
         return ResponseEntity.created(URI.create("/historico/" + calculoSalvo.id())).body(calculoSalvo);
@@ -91,56 +83,44 @@ public class EndpointController {
     @PostMapping("/pedidos")
     public ResponseEntity<PedidoRecebidoResponse> enviarPedido(@RequestParam String descricao) {
         UUID id = pedidoFilaService.enviar(descricao);
-        PedidoRecebidoResponse resposta = new PedidoRecebidoResponse(
-                id,
-                "Pedido recebido e enviado para processamento.",
-                "pedidos",
-                descricao,
-                PedidoStatus.PENDING
-        );
+        PedidoRecebidoResponse resposta = new PedidoRecebidoResponse(id,
+                "Pedido recebido e enviado para processamento.", "pedidos", descricao, PedidoStatus.PENDING);
         return ResponseEntity.accepted().body(resposta);
     }
 
     @GetMapping("/pedidos/{id}")
     public ResponseEntity<PedidoStatusResponse> buscarPedido(@PathVariable UUID id) {
-        return pedidoFilaService.buscarPorId(id)
-                .map(ResponseEntity::ok)
+        return pedidoFilaService.buscarPorId(id).map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @GetMapping("/historico/{id}")
     public ResponseEntity<CalculoSalvo> buscarNoHistorico(@PathVariable long id) {
-        return historicoCalculoService.buscarPorId(id)
-                .map(ResponseEntity::ok)
+        return historicoCalculoService.buscarPorId(id).map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PutMapping("/historico/{id}")
-    public ResponseEntity<CalculoSalvo> atualizarNoHistorico(
-            @PathVariable long id,
-            @RequestParam double numero1,
-            @RequestParam double numero2,
-            @RequestParam Operacao operacao) {
+    public ResponseEntity<CalculoSalvo> atualizarNoHistorico(@PathVariable long id, @RequestParam double numero1,
+            @RequestParam double numero2, @RequestParam Operacao operacao) {
         ResultadoOperacao resultado = executarOperacao(numero1, numero2, operacao);
-        return historicoCalculoService.atualizar(id, resultado)
-                .map(ResponseEntity::ok)
+        return historicoCalculoService.atualizar(id, resultado).map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/historico/{id}")
     public ResponseEntity<Void> removerDoHistorico(@PathVariable long id) {
-        return historicoCalculoService.removerPorId(id)
-                ? ResponseEntity.noContent().build()
+        return historicoCalculoService.removerPorId(id) ? ResponseEntity.noContent().build()
                 : ResponseEntity.notFound().build();
     }
 
     private ResultadoOperacao executarOperacao(double numero1, double numero2, Operacao operacao) {
         validarLimiteDosNumeros(numero1, numero2);
         double resultado = switch (operacao) {
-            case SOMA -> calculadora.somar(numero1, numero2);
-            case SUBTRACAO -> calculadora.subtrair(numero1, numero2);
-            case MULTIPLICACAO -> calculadora.multiplicar(numero1, numero2);
-            case DIVISAO -> calculadora.dividir(numero1, numero2);
+        case SOMA -> calculadora.somar(numero1, numero2);
+        case SUBTRACAO -> calculadora.subtrair(numero1, numero2);
+        case MULTIPLICACAO -> calculadora.multiplicar(numero1, numero2);
+        case DIVISAO -> calculadora.dividir(numero1, numero2);
         };
         return new ResultadoOperacao(numero1, numero2, operacao, resultado);
     }
