@@ -1,23 +1,24 @@
 package endpoint.service;
 
-import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
 
 import org.springframework.stereotype.Service;
 
 import endpoint.exception.CalculoDuplicadoException;
 import endpoint.model.CalculoSalvo;
 import endpoint.model.ResultadoOperacao;
+import endpoint.repository.CalculoRepository;
 
 @Service
 public class HistoricoCalculoService {
-    private final AtomicLong proximoId = new AtomicLong(1);
-    private final Map<Long, CalculoSalvo> calculos = new ConcurrentHashMap<>();
+    private final CalculoRepository calculoRepository;
+
+    public HistoricoCalculoService(CalculoRepository calculoRepository) {
+        this.calculoRepository = calculoRepository;
+    }
 
     public CalculoSalvo salvar(ResultadoOperacao resultado) {
-        boolean calculoJaExiste = calculos.values().stream()
+        boolean calculoJaExiste = calculoRepository.buscarTodos().stream()
                 .anyMatch(calculo -> calculo.numero1() == resultado.numero1()
                         && calculo.numero2() == resultado.numero2() && calculo.operacao() == resultado.operacao());
 
@@ -25,26 +26,25 @@ public class HistoricoCalculoService {
             throw new CalculoDuplicadoException();
         }
 
-        long id = proximoId.getAndIncrement();
+        long id = calculoRepository.gerarId();
         CalculoSalvo calculo = new CalculoSalvo(id, resultado.numero1(), resultado.numero2(), resultado.operacao(),
                 resultado.resultado());
-        calculos.put(id, calculo);
-        return calculo;
+        return calculoRepository.salvar(calculo);
     }
 
     public Optional<CalculoSalvo> buscarPorId(long id) {
-        return Optional.ofNullable(calculos.get(id));
+        return calculoRepository.buscarPorId(id);
     }
 
     public Optional<CalculoSalvo> atualizar(long id, ResultadoOperacao resultado) {
-        if (!calculos.containsKey(id)) {
+        if (calculoRepository.buscarPorId(id).isEmpty()) {
             return Optional.empty();
         }
 
-        boolean calculoJaExiste = calculos.entrySet().stream()
-                .anyMatch(entrada -> entrada.getKey() != id && entrada.getValue().numero1() == resultado.numero1()
-                        && entrada.getValue().numero2() == resultado.numero2()
-                        && entrada.getValue().operacao() == resultado.operacao());
+        boolean calculoJaExiste = calculoRepository.buscarTodos().stream()
+                .anyMatch(entrada -> entrada.id() != id && entrada.numero1() == resultado.numero1()
+                        && entrada.numero2() == resultado.numero2()
+                        && entrada.operacao() == resultado.operacao());
 
         if (calculoJaExiste) {
             throw new CalculoDuplicadoException();
@@ -52,11 +52,10 @@ public class HistoricoCalculoService {
 
         CalculoSalvo calculoAtualizado = new CalculoSalvo(id, resultado.numero1(), resultado.numero2(),
                 resultado.operacao(), resultado.resultado());
-        calculos.put(id, calculoAtualizado);
-        return Optional.of(calculoAtualizado);
+        return Optional.of(calculoRepository.salvar(calculoAtualizado));
     }
 
     public boolean removerPorId(long id) {
-        return calculos.remove(id) != null;
+        return calculoRepository.removerPorId(id);
     }
 }

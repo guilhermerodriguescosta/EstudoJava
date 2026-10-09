@@ -1,6 +1,7 @@
 package endpoint.service;
 
 import endpoint.config.RabbitMqConfig;
+import endpoint.repository.PedidoRepository;
 import endpoint.model.PedidoMensagem;
 import endpoint.model.PedidoStatus;
 import endpoint.model.PedidoStatusResponse;
@@ -17,7 +18,7 @@ class PedidoFilaServiceTest {
     @Test
     void deveEnviarPedidoParaAFilaPedidos() {
         RabbitTemplate rabbitTemplate = mock(RabbitTemplate.class);
-        PedidoFilaService pedidoFilaService = new PedidoFilaService(rabbitTemplate);
+        PedidoFilaService pedidoFilaService = new PedidoFilaService(rabbitTemplate, new PedidoRepository());
 
         var id = pedidoFilaService.enviar("Pedido #7");
 
@@ -27,7 +28,7 @@ class PedidoFilaServiceTest {
 
     @Test
     void deveMarcarPedidoComoProcessado() {
-        PedidoFilaService pedidoFilaService = new PedidoFilaService(mock(RabbitTemplate.class));
+        PedidoFilaService pedidoFilaService = new PedidoFilaService(mock(RabbitTemplate.class), new PedidoRepository());
         var id = pedidoFilaService.enviar("Pedido #9");
 
         pedidoFilaService.marcarComoProcessado(id);
@@ -35,5 +36,15 @@ class PedidoFilaServiceTest {
         PedidoStatusResponse pedido = pedidoFilaService.buscarPorId(id).orElseThrow();
         assertEquals(PedidoStatus.PROCESSED, pedido.status());
         assertTrue(pedidoFilaService.buscarPorId(java.util.UUID.randomUUID()).isEmpty());
+    }
+    @Test
+    void naoDeveCriarPedidoAoProcessarIdInexistente() {
+        PedidoRepository repository = new PedidoRepository();
+        PedidoFilaService service = new PedidoFilaService(mock(RabbitTemplate.class), repository);
+        var id = java.util.UUID.randomUUID();
+
+        service.marcarComoProcessado(id);
+
+        assertTrue(repository.buscarPorId(id).isEmpty());
     }
 }
