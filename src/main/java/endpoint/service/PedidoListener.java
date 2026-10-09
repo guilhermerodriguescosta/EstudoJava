@@ -21,6 +21,7 @@ public class PedidoListener {
     @RabbitListener(queues = RabbitMqConfig.FILA_PEDIDOS)
     public void processar(PedidoMensagem pedido) {
         pedidoFilaService.marcarComoProcessado(pedido.id());
-        LOGGER.info("Pedido {} recebido da fila {}: {}", pedido.id(), RabbitMqConfig.FILA_PEDIDOS, pedido.descricao());
+        LOGGER.info("Pedido {} recebido da fila {}: {}", pedido.id(), RabbitMqConfig.FILA_PEDIDOS,
+                pedido.descricao());
     }
 }

@@ -33,8 +33,10 @@ public class EndpointController {
     private final LimiteRequisicoesService limiteRequisicoesService;
     private final PedidoFilaService pedidoFilaService;
 
-    public EndpointController(Calculadora calculadora, HistoricoCalculoService historicoCalculoService,
-            LimiteRequisicoesService limiteRequisicoesService, PedidoFilaService pedidoFilaService) {
+    public EndpointController(Calculadora calculadora,
+            HistoricoCalculoService historicoCalculoService,
+            LimiteRequisicoesService limiteRequisicoesService,
+            PedidoFilaService pedidoFilaService) {
         this.calculadora = calculadora;
         this.historicoCalculoService = historicoCalculoService;
         this.limiteRequisicoesService = limiteRequisicoesService;
@@ -57,7 +59,8 @@ public class EndpointController {
     }
 
     @GetMapping("/multiplicar")
-    public ResultadoOperacao multiplicar(@RequestParam double numero1, @RequestParam double numero2) {
+    public ResultadoOperacao multiplicar(@RequestParam double numero1,
+            @RequestParam double numero2) {
         return executarOperacao(numero1, numero2, Operacao.MULTIPLICACAO);
     }
 
@@ -73,18 +76,22 @@ public class EndpointController {
     }
 
     @PostMapping("/historico")
-    public ResponseEntity<CalculoSalvo> salvarNoHistorico(Authentication authentication, @RequestParam double numero1,
-            @RequestParam double numero2, @RequestParam Operacao operacao) {
+    public ResponseEntity<CalculoSalvo> salvarNoHistorico(Authentication authentication,
+            @RequestParam double numero1, @RequestParam double numero2,
+            @RequestParam Operacao operacao) {
         limiteRequisicoesService.validarCriacao(authentication.getName());
-        CalculoSalvo calculoSalvo = historicoCalculoService.salvar(executarOperacao(numero1, numero2, operacao));
-        return ResponseEntity.created(URI.create("/historico/" + calculoSalvo.id())).body(calculoSalvo);
+        CalculoSalvo calculoSalvo = historicoCalculoService
+                .salvar(executarOperacao(numero1, numero2, operacao));
+        return ResponseEntity.created(URI.create("/historico/" + calculoSalvo.id()))
+                .body(calculoSalvo);
     }
 
     @PostMapping("/pedidos")
     public ResponseEntity<PedidoRecebidoResponse> enviarPedido(@RequestParam String descricao) {
         UUID id = pedidoFilaService.enviar(descricao);
         PedidoRecebidoResponse resposta = new PedidoRecebidoResponse(id,
-                "Pedido recebido e enviado para processamento.", "pedidos", descricao, PedidoStatus.PENDING);
+                "Pedido recebido e enviado para processamento.", "pedidos", descricao,
+                PedidoStatus.PENDING);
         return ResponseEntity.accepted().body(resposta);
     }
 
@@ -101,8 +108,9 @@ public class EndpointController {
     }
 
     @PutMapping("/historico/{id}")
-    public ResponseEntity<CalculoSalvo> atualizarNoHistorico(@PathVariable long id, @RequestParam double numero1,
-            @RequestParam double numero2, @RequestParam Operacao operacao) {
+    public ResponseEntity<CalculoSalvo> atualizarNoHistorico(@PathVariable long id,
+            @RequestParam double numero1, @RequestParam double numero2,
+            @RequestParam Operacao operacao) {
         ResultadoOperacao resultado = executarOperacao(numero1, numero2, operacao);
         return historicoCalculoService.atualizar(id, resultado).map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());

@@ -20,15 +20,16 @@ public class HistoricoCalculoService {
     public CalculoSalvo salvar(ResultadoOperacao resultado) {
         boolean calculoJaExiste = calculoRepository.buscarTodos().stream()
                 .anyMatch(calculo -> calculo.numero1() == resultado.numero1()
-                        && calculo.numero2() == resultado.numero2() && calculo.operacao() == resultado.operacao());
+                        && calculo.numero2() == resultado.numero2()
+                        && calculo.operacao() == resultado.operacao());
 
         if (calculoJaExiste) {
             throw new CalculoDuplicadoException();
         }
 
         long id = calculoRepository.gerarId();
-        CalculoSalvo calculo = new CalculoSalvo(id, resultado.numero1(), resultado.numero2(), resultado.operacao(),
-                resultado.resultado());
+        CalculoSalvo calculo = new CalculoSalvo(id, resultado.numero1(), resultado.numero2(),
+                resultado.operacao(), resultado.resultado());
         return calculoRepository.salvar(calculo);
     }
 
@@ -50,8 +51,8 @@ public class HistoricoCalculoService {
             throw new CalculoDuplicadoException();
         }
 
-        CalculoSalvo calculoAtualizado = new CalculoSalvo(id, resultado.numero1(), resultado.numero2(),
-                resultado.operacao(), resultado.resultado());
+        CalculoSalvo calculoAtualizado = new CalculoSalvo(id, resultado.numero1(),
+                resultado.numero2(), resultado.operacao(), resultado.resultado());
         return Optional.of(calculoRepository.salvar(calculoAtualizado));
     }
 

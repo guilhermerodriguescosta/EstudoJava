@@ -18,17 +18,21 @@ class PedidoFilaServiceTest {
     @Test
     void deveEnviarPedidoParaAFilaPedidos() {
         RabbitTemplate rabbitTemplate = mock(RabbitTemplate.class);
-        PedidoFilaService pedidoFilaService = new PedidoFilaService(rabbitTemplate, new PedidoRepository());
+        PedidoFilaService pedidoFilaService = new PedidoFilaService(rabbitTemplate,
+                new PedidoRepository());
 
         var id = pedidoFilaService.enviar("Pedido #7");
 
-        verify(rabbitTemplate).convertAndSend(RabbitMqConfig.FILA_PEDIDOS, new PedidoMensagem(id, "Pedido #7"));
-        assertEquals(PedidoStatus.PENDING, pedidoFilaService.buscarPorId(id).orElseThrow().status());
+        verify(rabbitTemplate).convertAndSend(RabbitMqConfig.FILA_PEDIDOS,
+                new PedidoMensagem(id, "Pedido #7"));
+        assertEquals(PedidoStatus.PENDING,
+                pedidoFilaService.buscarPorId(id).orElseThrow().status());
     }
 
     @Test
     void deveMarcarPedidoComoProcessado() {
-        PedidoFilaService pedidoFilaService = new PedidoFilaService(mock(RabbitTemplate.class), new PedidoRepository());
+        PedidoFilaService pedidoFilaService = new PedidoFilaService(mock(RabbitTemplate.class),
+                new PedidoRepository());
         var id = pedidoFilaService.enviar("Pedido #9");
 
         pedidoFilaService.marcarComoProcessado(id);
@@ -37,6 +41,7 @@ class PedidoFilaServiceTest {
         assertEquals(PedidoStatus.PROCESSED, pedido.status());
         assertTrue(pedidoFilaService.buscarPorId(java.util.UUID.randomUUID()).isEmpty());
     }
+
     @Test
     void naoDeveCriarPedidoAoProcessarIdInexistente() {
         PedidoRepository repository = new PedidoRepository();

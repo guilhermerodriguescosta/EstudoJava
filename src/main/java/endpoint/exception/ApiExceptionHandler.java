@@ -10,37 +10,43 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 @RestControllerAdvice
 public class ApiExceptionHandler {
     @ExceptionHandler(LimiteRequisicoesExcedidoException.class)
-    public ResponseEntity<Map<String, String>> tratarLimiteRequisicoes(LimiteRequisicoesExcedidoException exception) {
-        return ResponseEntity.status(429).header("Retry-After", "60")
-                .body(Map.of("erro", "Limite de requisições excedido", "mensagem", exception.getMessage()));
+    public ResponseEntity<Map<String, String>> tratarLimiteRequisicoes(
+            LimiteRequisicoesExcedidoException exception) {
+        return ResponseEntity.status(429).header("Retry-After", "60").body(Map.of("erro",
+                "Limite de requisições excedido", "mensagem", exception.getMessage()));
     }
 
     @ExceptionHandler(NumeroForaDoLimiteException.class)
-    public ResponseEntity<Map<String, String>> tratarNumeroForaDoLimite(NumeroForaDoLimiteException exception) {
+    public ResponseEntity<Map<String, String>> tratarNumeroForaDoLimite(
+            NumeroForaDoLimiteException exception) {
         return ResponseEntity.unprocessableContent()
                 .body(Map.of("erro", "Número fora do limite", "mensagem", exception.getMessage()));
     }
 
     @ExceptionHandler(CalculoDuplicadoException.class)
-    public ResponseEntity<Map<String, String>> tratarCalculoDuplicado(CalculoDuplicadoException exception) {
-        return ResponseEntity.status(409).body(Map.of("erro", "Cálculo duplicado", "mensagem", exception.getMessage()));
+    public ResponseEntity<Map<String, String>> tratarCalculoDuplicado(
+            CalculoDuplicadoException exception) {
+        return ResponseEntity.status(409)
+                .body(Map.of("erro", "Cálculo duplicado", "mensagem", exception.getMessage()));
     }
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<Map<String, String>> tratarParametroAusente(
             MissingServletRequestParameterException exception) {
-        return ResponseEntity.badRequest().body(Map.of("erro", "Parâmetro obrigatório ausente", "mensagem",
-                "O parâmetro '" + exception.getParameterName() + "' é obrigatório."));
+        return ResponseEntity.badRequest().body(Map.of("erro", "Parâmetro obrigatório ausente",
+                "mensagem", "O parâmetro '" + exception.getParameterName() + "' é obrigatório."));
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public ResponseEntity<Map<String, String>> tratarParametroInvalido(MethodArgumentTypeMismatchException exception) {
+    public ResponseEntity<Map<String, String>> tratarParametroInvalido(
+            MethodArgumentTypeMismatchException exception) {
         return ResponseEntity.badRequest().body(Map.of("erro", "Parâmetro inválido", "mensagem",
                 "O parâmetro '" + exception.getName() + "' possui um valor inválido."));
     }
 
     @ExceptionHandler(DivisaoPorZeroException.class)
-    public ResponseEntity<Map<String, String>> tratarDivisaoPorZero(DivisaoPorZeroException exception) {
+    public ResponseEntity<Map<String, String>> tratarDivisaoPorZero(
+            DivisaoPorZeroException exception) {
         return ResponseEntity.badRequest()
                 .body(Map.of("erro", "Operação inválida", "mensagem", exception.getMessage()));
     }

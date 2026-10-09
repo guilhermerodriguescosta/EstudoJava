@@ -25,7 +25,8 @@ public class PedidoFilaService {
     public UUID enviar(String descricao) {
         UUID id = UUID.randomUUID();
         pedidoRepository.salvar(new PedidoStatusResponse(id, descricao, PedidoStatus.PENDING));
-        rabbitTemplate.convertAndSend(RabbitMqConfig.FILA_PEDIDOS, new PedidoMensagem(id, descricao));
+        rabbitTemplate.convertAndSend(RabbitMqConfig.FILA_PEDIDOS,
+                new PedidoMensagem(id, descricao));
         return id;
     }
 
@@ -34,7 +35,7 @@ public class PedidoFilaService {
     }
 
     public void marcarComoProcessado(UUID id) {
-        pedidoRepository.atualizarSeExistir(id,
-                pedido -> new PedidoStatusResponse(pedido.id(), pedido.descricao(), PedidoStatus.PROCESSED));
+        pedidoRepository.atualizarSeExistir(id, pedido -> new PedidoStatusResponse(pedido.id(),
+                pedido.descricao(), PedidoStatus.PROCESSED));
     }
 }

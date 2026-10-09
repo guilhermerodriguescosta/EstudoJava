@@ -17,7 +17,8 @@ class ConsumidorPedidosTest {
     void deveConfirmarMensagemProcessada() throws Exception {
         Channel channel = mock(Channel.class);
         Delivery entrega = new Delivery(new Envelope(42L, false, "", "pedidos"),
-                new AMQP.BasicProperties.Builder().build(), "Pedido #42".getBytes(StandardCharsets.UTF_8));
+                new AMQP.BasicProperties.Builder().build(),
+                "Pedido #42".getBytes(StandardCharsets.UTF_8));
 
         ConsumidorPedidos.processarPedido(channel, entrega);
 

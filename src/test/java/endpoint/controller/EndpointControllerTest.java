@@ -27,13 +27,15 @@ class EndpointControllerTest {
         UUID id = UUID.randomUUID();
         when(pedidoFilaService.enviar("Pedido #8")).thenReturn(id);
         EndpointController controller = new EndpointController(mock(Calculadora.class),
-                mock(HistoricoCalculoService.class), mock(LimiteRequisicoesService.class), pedidoFilaService);
+                mock(HistoricoCalculoService.class), mock(LimiteRequisicoesService.class),
+                pedidoFilaService);
 
         ResponseEntity<PedidoRecebidoResponse> resposta = controller.enviarPedido("Pedido #8");
 
         assertEquals(HttpStatus.ACCEPTED, resposta.getStatusCode());
         assertEquals(id, resposta.getBody().id());
-        assertEquals("Pedido recebido e enviado para processamento.", resposta.getBody().mensagem());
+        assertEquals("Pedido recebido e enviado para processamento.",
+                resposta.getBody().mensagem());
         assertEquals("pedidos", resposta.getBody().fila());
         assertEquals("Pedido #8", resposta.getBody().descricao());
         assertEquals(PedidoStatus.PENDING, resposta.getBody().status());
@@ -44,10 +46,12 @@ class EndpointControllerTest {
     void deveConsultarStatusDoPedido() {
         PedidoFilaService pedidoFilaService = mock(PedidoFilaService.class);
         UUID id = UUID.randomUUID();
-        PedidoStatusResponse pedido = new PedidoStatusResponse(id, "Pedido #10", PedidoStatus.PROCESSED);
+        PedidoStatusResponse pedido = new PedidoStatusResponse(id, "Pedido #10",
+                PedidoStatus.PROCESSED);
         when(pedidoFilaService.buscarPorId(id)).thenReturn(Optional.of(pedido));
         EndpointController controller = new EndpointController(mock(Calculadora.class),
-                mock(HistoricoCalculoService.class), mock(LimiteRequisicoesService.class), pedidoFilaService);
+                mock(HistoricoCalculoService.class), mock(LimiteRequisicoesService.class),
+                pedidoFilaService);
 
         ResponseEntity<PedidoStatusResponse> resposta = controller.buscarPedido(id);
 

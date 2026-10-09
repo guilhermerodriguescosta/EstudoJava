@@ -14,16 +14,19 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http.csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(authorize -> authorize.requestMatchers(HttpMethod.DELETE, "/historico/**")
-                        .hasRole("ADMIN").requestMatchers(HttpMethod.PUT, "/historico/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/historico").authenticated().anyRequest().permitAll())
+                .authorizeHttpRequests(
+                        authorize -> authorize.requestMatchers(HttpMethod.DELETE, "/historico/**")
+                                .hasRole("ADMIN").requestMatchers(HttpMethod.PUT, "/historico/**")
+                                .hasRole("ADMIN").requestMatchers(HttpMethod.POST, "/historico")
+                                .authenticated().anyRequest().permitAll())
                 .httpBasic(basic -> {
                 }).build();
     }
 
     @Bean
     UserDetailsService usuarios() {
-        return new InMemoryUserDetailsManager(User.withUsername("usuario").password("{noop}123").roles("USER").build(),
+        return new InMemoryUserDetailsManager(
+                User.withUsername("usuario").password("{noop}123").roles("USER").build(),
                 User.withUsername("admin").password("{noop}123").roles("ADMIN").build(),
                 User.withUsername("limitado").password("{noop}123").roles("USER").build());
     }
