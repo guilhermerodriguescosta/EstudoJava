@@ -26,7 +26,7 @@ public class PedidoRepository {
 
     @Transactional(readOnly = true)
     public Optional<PedidoStatusResponse> buscarPorId(UUID id) {
-        return jpa.findById(id).map(PedidoEntity::toResponse);
+        return jpa.findById(id).map(entidade -> entidade.toResponse());
     }
 
     @Transactional

@@ -30,7 +30,7 @@ public class CalculoRepository {
 
     @Transactional(readOnly = true)
     public Optional<CalculoSalvo> buscarPorId(long id) {
-        return jpa.findById(id).map(CalculoEntity::toResponse);
+        return jpa.findById(id).map(entidade -> entidade.toResponse());
     }
 
     @Transactional
