@@ -1,255 +1,1736 @@
 {
   "info": {
     "name": "EstudoJava - API Calculadora",
-    "description": "Collection para testar a API local da calculadora.",
+    "description": "API local com PostgreSQL e RabbitMQ. Execute as pastas na ordem no Collection Runner e habilite a persistência dos valores de variáveis. Os cálculos de teste usam números aleatórios e são excluídos ao final; pedidos permanecem, pois não existe endpoint de exclusão. Não execute simultaneamente contra a mesma aplicação.\n\nO cenário 429 espera até 61 segundos antes de começar para esvaziar a janela de requisições do usuário limitado. Configure timeout de scripts >= 90000 ms no Newman. Não adicione atraso entre as quatro requisições do cenário 429.\n\nPersistência manual: defina modoPersistencia=preparar e execute somente a pasta 06; salve os valores das variáveis. Reinicie/recrie os containers sem remover volumes. Defina modoPersistencia=verificar e execute somente a pasta 07. As duas pastas são ignoradas por padrão (modoPersistencia=desativado). IDs e snapshots da persistência são separados dos testes CRUD. Consulte postman/README.md.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
     {
       "key": "baseUrl",
-      "value": "http://localhost:8080"
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "modoPersistencia",
+      "value": "desativado",
+      "type": "string"
     },
     {
       "key": "calculoId",
-      "value": "1"
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "calculoSnapshot",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "calculoNumero1",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "calculoNumero2",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "referenciaId",
+      "value": "",
+      "type": "string"
     },
     {
       "key": "pedidoId",
-      "value": ""
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "pedidoDescricao",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "pedidoSnapshot",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "limiteUltimaTentativa",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "limiteNumero2Base",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "persistenciaNumero1",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "persistenciaNumero2",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "persistenciaCalculoId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "persistenciaCalculoSnapshot",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "persistenciaPedidoId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "persistenciaPedidoDescricao",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "persistenciaPedidoSnapshot",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "limiteNumero1",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "limiteNumero2",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "limiteNumero3",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "limiteNumero4",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "limiteId1",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "limiteId2",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "limiteId3",
+      "value": "",
+      "type": "string"
     }
   ],
   "item": [
     {
-      "name": "RabbitMQ",
+      "name": "00 - Disponibilidade - Hello World",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/hello"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('Mensagem correta', () => pm.expect(pm.response.text()).to.eql('Hello World'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "01 - Operações válidas",
+      "item": [
+        {
+          "name": "Somar",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/somar?numero1=10&numero2=5"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Resultado igual a 15', () => pm.expect(pm.response.json().resultado).to.eql(15));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Subtrair",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/subtrair?numero1=10&numero2=5"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Resultado igual a 5', () => pm.expect(pm.response.json().resultado).to.eql(5));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Multiplicar",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/multiplicar?numero1=10&numero2=5"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Resultado igual a 50', () => pm.expect(pm.response.json().resultado).to.eql(50));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Dividir",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/dividir?numero1=10&numero2=5"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Resultado igual a 2', () => pm.expect(pm.response.json().resultado).to.eql(2));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Calcular multiplicação",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/calcular?numero1=8&numero2=4&operacao=MULTIPLICACAO"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Resultado igual a 32', () => pm.expect(pm.response.json().resultado).to.eql(32));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "02 - Histórico - CRUD e duplicidade",
+      "item": [
+        {
+          "name": "Criar cálculo no histórico - 201 Created",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "usuario",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "123",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/historico?numero1={{calculoNumero1}}&numero2={{calculoNumero2}}&operacao=DIVISAO"
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.unset('calculoId');",
+                  "pm.collectionVariables.unset('calculoSnapshot');",
+                  "pm.collectionVariables.set('calculoNumero1', 10000 + Math.floor(Math.random() * 890000));",
+                  "pm.collectionVariables.set('calculoNumero2', 10000 + Math.floor(Math.random() * 890000));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "if (pm.response.code === 201) {",
+                  "    const body = pm.response.json();",
+                  "    const a = Number(pm.collectionVariables.get('calculoNumero1'));",
+                  "    const b = Number(pm.collectionVariables.get('calculoNumero2'));",
+                  "    pm.test('ID gerado pelo banco', () => pm.expect(body.id).to.be.a('number').and.above(0));",
+                  "    pm.test('Valores e operação corretos', () => {",
+                  "        pm.expect(body.numero1).to.eql(a);",
+                  "        pm.expect(body.numero2).to.eql(b);",
+                  "        pm.expect(body.operacao).to.eql('DIVISAO');",
+                  "        pm.expect(body.resultado).to.be.closeTo(a / b, 1e-9);",
+                  "    });",
+                  "    pm.test(\"Location corresponde ao ID\", () => pm.expect(pm.response.headers.get(\"Location\")).to.eql(\"/historico/\" + body.id));",
+                  "    pm.collectionVariables.set('calculoId', String(body.id));",
+                  "    pm.collectionVariables.set('calculoSnapshot', JSON.stringify(body));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Criar cálculo duplicado - 409 Conflict",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "usuario",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "123",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/historico?numero1={{calculoNumero1}}&numero2={{calculoNumero2}}&operacao=DIVISAO"
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.collectionVariables.get('calculoId')) throw new Error('Execute primeiro a preparação desta pasta: falta calculoId.');",
+                  "if (!pm.collectionVariables.get('calculoNumero1')) throw new Error('Execute primeiro a preparação desta pasta: falta calculoNumero1.');",
+                  "if (!pm.collectionVariables.get('calculoNumero2')) throw new Error('Execute primeiro a preparação desta pasta: falta calculoNumero2.');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 409', () => pm.response.to.have.status(409));",
+                  "pm.test('Erro informa cálculo duplicado', () => pm.expect(pm.response.json().erro).to.eql('Cálculo duplicado'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Número fora do limite - 422 Unprocessable Content",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "usuario",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "123",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/historico?numero1=1000001&numero2=2&operacao=SOMA"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 422', () => pm.response.to.have.status(422));",
+                  "pm.test('Erro informa o limite', () => pm.expect(pm.response.json().erro).to.eql('Número fora do limite'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar cálculo criado - 200 OK",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/historico/{{calculoId}}"
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.collectionVariables.get('calculoId')) throw new Error('Execute primeiro a preparação desta pasta: falta calculoId.');",
+                  "if (!pm.collectionVariables.get('calculoSnapshot')) throw new Error('Execute primeiro a preparação desta pasta: falta calculoSnapshot.');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) {",
+                  "    pm.test('Todos os dados persistidos correspondem ao registro salvo', () =>",
+                  "        pm.expect(pm.response.json()).to.deep.eql(JSON.parse(pm.collectionVariables.get('calculoSnapshot'))));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Editar cálculo como usuário comum - 403 Forbidden",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "usuario",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "123",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/historico/{{calculoId}}?numero1={{calculoNumero1}}&numero2={{calculoNumero2}}&operacao=MULTIPLICACAO"
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.collectionVariables.get('calculoId')) throw new Error('Execute primeiro a preparação desta pasta: falta calculoId.');",
+                  "if (!pm.collectionVariables.get('calculoNumero1')) throw new Error('Execute primeiro a preparação desta pasta: falta calculoNumero1.');",
+                  "if (!pm.collectionVariables.get('calculoNumero2')) throw new Error('Execute primeiro a preparação desta pasta: falta calculoNumero2.');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Editar cálculo como admin - 200 OK",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "admin",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "123",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/historico/{{calculoId}}?numero1={{calculoNumero1}}&numero2={{calculoNumero2}}&operacao=MULTIPLICACAO"
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.collectionVariables.get('calculoId')) throw new Error('Execute primeiro a preparação desta pasta: falta calculoId.');",
+                  "if (!pm.collectionVariables.get('calculoNumero1')) throw new Error('Execute primeiro a preparação desta pasta: falta calculoNumero1.');",
+                  "if (!pm.collectionVariables.get('calculoNumero2')) throw new Error('Execute primeiro a preparação desta pasta: falta calculoNumero2.');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) {",
+                  "    const body = pm.response.json();",
+                  "    const a = Number(pm.collectionVariables.get('calculoNumero1'));",
+                  "    const b = Number(pm.collectionVariables.get('calculoNumero2'));",
+                  "    pm.test('ID gerado pelo banco', () => pm.expect(body.id).to.be.a('number').and.above(0));",
+                  "    pm.test('Valores e operação corretos', () => {",
+                  "        pm.expect(body.numero1).to.eql(a);",
+                  "        pm.expect(body.numero2).to.eql(b);",
+                  "        pm.expect(body.operacao).to.eql('MULTIPLICACAO');",
+                  "        pm.expect(body.resultado).to.be.closeTo(a * b, 1e-9);",
+                  "    });",
+                  "    pm.test(\"Atualização preserva o ID\", () => pm.expect(body.id).to.eql(Number(pm.collectionVariables.get(\"calculoId\"))));",
+                  "    pm.collectionVariables.set('calculoId', String(body.id));",
+                  "    pm.collectionVariables.set('calculoSnapshot', JSON.stringify(body));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Criar referência para duplicidade na atualização - 201",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/historico?numero1={{calculoNumero1}}&numero2={{calculoNumero2}}&operacao=SOMA",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "usuario",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "123",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.unset('referenciaId');",
+                  "if (!pm.collectionVariables.get('calculoId')) throw new Error('Crie primeiro o cálculo desta pasta.');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "if (pm.response.code === 201) pm.collectionVariables.set('referenciaId', String(pm.response.json().id));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Atualizar para cálculo duplicado - 409",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": "{{baseUrl}}/historico/{{calculoId}}?numero1={{calculoNumero1}}&numero2={{calculoNumero2}}&operacao=SOMA",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "admin",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "123",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.collectionVariables.get('calculoId')) throw new Error('Execute primeiro a preparação desta pasta: falta calculoId.');",
+                  "if (!pm.collectionVariables.get('referenciaId')) throw new Error('Execute primeiro a preparação desta pasta: falta referenciaId.');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 409', () => pm.response.to.have.status(409));",
+                  "pm.test('Erro de duplicidade', () => pm.expect(pm.response.json().erro).to.eql('Cálculo duplicado'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar cálculo atualizado - 200 OK",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/historico/{{calculoId}}"
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.collectionVariables.get('calculoId')) throw new Error('Execute primeiro a preparação desta pasta: falta calculoId.');",
+                  "if (!pm.collectionVariables.get('calculoSnapshot')) throw new Error('Execute primeiro a preparação desta pasta: falta calculoSnapshot.');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) {",
+                  "    pm.test('Todos os dados persistidos correspondem ao registro salvo', () =>",
+                  "        pm.expect(pm.response.json()).to.deep.eql(JSON.parse(pm.collectionVariables.get('calculoSnapshot'))));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Excluir referência criada nesta execução - 204",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/historico/{{referenciaId}}",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "admin",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "123",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.collectionVariables.get('referenciaId')) throw new Error('Execute primeiro a preparação desta pasta: falta referenciaId.');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Excluir cálculo como usuário comum - 403 Forbidden",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "usuario",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "123",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/historico/{{calculoId}}"
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.collectionVariables.get('calculoId')) throw new Error('Execute primeiro a preparação desta pasta: falta calculoId.');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Excluir cálculo criado - 204 No Content",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "admin",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "123",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/historico/{{calculoId}}"
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.collectionVariables.get('calculoId')) throw new Error('Execute primeiro a preparação desta pasta: falta calculoId.');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 204', () => pm.response.to.have.status(204));",
+                  "pm.test('Resposta não possui corpo', () => pm.expect(pm.response.text()).to.eql(''));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Excluir cálculo já removido - 404 Not Found",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "admin",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "123",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/historico/{{calculoId}}"
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.collectionVariables.get('calculoId')) throw new Error('Execute primeiro a preparação desta pasta: falta calculoId.');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar cálculo inexistente - 404 Not Found",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/historico/{{calculoId}}"
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.collectionVariables.get('calculoId')) throw new Error('Execute primeiro a preparação desta pasta: falta calculoId.');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "03 - Validações e autenticação",
+      "item": [
+        {
+          "name": "Excluir cálculo sem autenticação - 401 Unauthorized",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/historico/-1"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Editar cálculo sem autenticação - 401 Unauthorized",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": "{{baseUrl}}/historico/-1?numero1=9&numero2=3&operacao=MULTIPLICACAO"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Editar cálculo inexistente como admin - 404 Not Found",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "admin",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "123",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/historico/-1?numero1=9&numero2=3&operacao=MULTIPLICACAO"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Criar cálculo sem autenticação - 401 Unauthorized",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/historico?numero1=7&numero2=3&operacao=SOMA"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Parâmetro obrigatório ausente",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/somar?numero1=10"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Parâmetro inválido",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/somar?numero1=abc&numero2=5"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Divisão por zero",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/dividir?numero1=10&numero2=0"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "04 - Pedidos - RabbitMQ e PostgreSQL",
       "item": [
         {
           "name": "Enviar pedido - 202 Accepted",
           "request": {
             "method": "POST",
             "header": [],
-            "url": "{{baseUrl}}/pedidos?descricao=Pedido%20via%20Postman"
+            "url": "{{baseUrl}}/pedidos?descricao={{pedidoDescricao}}"
           },
-          "event": [{
-            "listen": "test",
-            "script": {
-              "type": "text/javascript",
-              "exec": [
-                "pm.test('Status 202', () => pm.response.to.have.status(202));",
-                "pm.test('Confirmação de recebimento', () => pm.expect(pm.response.json().mensagem).to.eql('Pedido recebido e enviado para processamento.'));",
-                "pm.test('Fila correta', () => pm.expect(pm.response.json().fila).to.eql('pedidos'));",
-                "pm.test('Pedido inicia como pendente', () => pm.expect(pm.response.json().status).to.eql('PENDING'));",
-                "pm.test('ID do pedido foi gerado', () => pm.expect(pm.response.json().id).to.be.a('string').and.not.empty);",
-                "pm.collectionVariables.set('pedidoId', pm.response.json().id);"
-              ]
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.unset('pedidoId');",
+                  "pm.collectionVariables.unset('pedidoSnapshot');",
+                  "pm.collectionVariables.set('pedidoDescricao', 'Postman-' + pm.variables.replaceIn('{{$guid}}'));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 202', () => pm.response.to.have.status(202));",
+                  "if (pm.response.code === 202) {",
+                  "    const body = pm.response.json();",
+                  "    pm.test('Confirmação, fila e status corretos', () => {",
+                  "        pm.expect(body.mensagem).to.eql('Pedido recebido e enviado para processamento.');",
+                  "        pm.expect(body.fila).to.eql('pedidos');",
+                  "        pm.expect(body.status).to.eql('PENDING');",
+                  "        pm.expect(body.descricao).to.eql(pm.collectionVariables.get('pedidoDescricao'));",
+                  "        pm.expect(body.id).to.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);",
+                  "    });",
+                  "    pm.collectionVariables.set('pedidoId', body.id);",
+                  "}"
+                ]
+              }
             }
-          }]
+          ]
         },
         {
-          "name": "Consultar status do pedido - 200 OK",
+          "name": "Aguardar pedido processado - 200 OK",
           "request": {
             "method": "GET",
             "header": [],
             "url": "{{baseUrl}}/pedidos/{{pedidoId}}"
           },
-          "event": [{
-            "listen": "test",
-            "script": {
-              "type": "text/javascript",
-              "exec": [
-                "pm.test('Status 200', () => pm.response.to.have.status(200));",
-                "pm.test('ID corresponde ao pedido enviado', () => pm.expect(pm.response.json().id).to.eql(pm.collectionVariables.get('pedidoId')));",
-                "pm.test('Status valido', () => pm.expect(['PENDING', 'PROCESSED']).to.include(pm.response.json().status));"
-              ]
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.collectionVariables.get('pedidoId')) throw new Error('Execute primeiro a preparação desta pasta: falta pedidoId.');",
+                  "if (!pm.collectionVariables.get('pedidoDescricao')) throw new Error('Execute primeiro a preparação desta pasta: falta pedidoDescricao.');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const id = pm.collectionVariables.get('pedidoId');",
+                  "const descricao = pm.collectionVariables.get('pedidoDescricao');",
+                  "const url = pm.variables.replaceIn('{{baseUrl}}') + '/pedidos/' + id;",
+                  "function conferir(response, attempt) {",
+                  "    if (response.code !== 200) {",
+                  "        pm.test('Pedido existe no banco', () => pm.expect(response.code).to.eql(200));",
+                  "        return;",
+                  "    }",
+                  "    const body = response.json();",
+                  "    if (body.status === 'PENDING' && attempt < 20) {",
+                  "        setTimeout(() => pm.sendRequest(url, (error, next) => {",
+                  "            if (error) { pm.test('Consulta do pedido sem erro de conexão', () => pm.expect(error).to.eql(null)); return; }",
+                  "            conferir(next, attempt + 1);",
+                  "        }), 500);",
+                  "        return;",
+                  "    }",
+                  "    pm.test('Pedido processado pelo consumidor RabbitMQ', () => {",
+                  "        pm.expect(body.id).to.eql(id);",
+                  "        pm.expect(body.descricao).to.eql(descricao);",
+                  "        pm.expect(body.status).to.eql('PROCESSED');",
+                  "    });",
+                  "    if (body.status === 'PROCESSED') pm.collectionVariables.set('pedidoSnapshot', JSON.stringify(body));",
+                  "}",
+                  "conferir(pm.response, 0);"
+                ]
+              }
             }
-          }]
+          ]
+        },
+        {
+          "name": "Consultar UUID não cadastrado - 404",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/pedidos/{{$guid}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
         }
       ]
     },
     {
-      "name": "Hello World",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": "{{baseUrl}}/hello"
-      },
-      "event": [{
-        "listen": "test",
-        "script": { "type": "text/javascript", "exec": [
-          "pm.test('Status 200', () => pm.response.to.have.status(200));",
-          "pm.test('Mensagem correta', () => pm.expect(pm.response.text()).to.eql('Hello World'));"
-        ] }
-      }]
-    },
-    {
-      "name": "Operações válidas",
-      "item": [
-        {
-          "name": "Somar",
-          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/somar?numero1=10&numero2=5" },
-          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));", "pm.test('Resultado igual a 15', () => pm.expect(pm.response.json().resultado).to.eql(15));"] } }]
-        },
-        {
-          "name": "Subtrair",
-          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/subtrair?numero1=10&numero2=5" },
-          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));", "pm.test('Resultado igual a 5', () => pm.expect(pm.response.json().resultado).to.eql(5));"] } }]
-        },
-        {
-          "name": "Multiplicar",
-          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/multiplicar?numero1=10&numero2=5" },
-          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));", "pm.test('Resultado igual a 50', () => pm.expect(pm.response.json().resultado).to.eql(50));"] } }]
-        },
-        {
-          "name": "Dividir",
-          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/dividir?numero1=10&numero2=5" },
-          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));", "pm.test('Resultado igual a 2', () => pm.expect(pm.response.json().resultado).to.eql(2));"] } }]
-        },
-        {
-          "name": "Calcular multiplicação",
-          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/calcular?numero1=8&numero2=4&operacao=MULTIPLICACAO" },
-          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));", "pm.test('Resultado igual a 32', () => pm.expect(pm.response.json().resultado).to.eql(32));"] } }]
-        }
-      ]
-    },
-    {
-      "name": "Histórico de cálculos",
-      "item": [
-        {
-          "name": "Criar cálculo no histórico - 201 Created",
-          "request": { "method": "POST", "header": [], "auth": { "type": "basic", "basic": [{ "key": "username", "value": "usuario", "type": "string" }, { "key": "password", "value": "123", "type": "string" }] }, "url": "{{baseUrl}}/historico?numero1=10&numero2=2&operacao=DIVISAO" },
-          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
-            "pm.test('Status 201', () => pm.response.to.have.status(201));",
-            "pm.test('Location aponta para o cálculo criado', () => pm.expect(pm.response.headers.get('Location')).to.include('/historico/'));",
-            "pm.test('Resultado igual a 5', () => pm.expect(pm.response.json().resultado).to.eql(5));",
-            "pm.collectionVariables.set('calculoId', pm.response.json().id);"
-          ] } }]
-        },
-        {
-          "name": "Criar cálculo duplicado - 409 Conflict",
-          "request": { "method": "POST", "header": [], "auth": { "type": "basic", "basic": [{ "key": "username", "value": "usuario", "type": "string" }, { "key": "password", "value": "123", "type": "string" }] }, "url": "{{baseUrl}}/historico?numero1=10&numero2=2&operacao=DIVISAO" },
-          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
-            "pm.test('Status 409', () => pm.response.to.have.status(409));",
-            "pm.test('Erro informa cálculo duplicado', () => pm.expect(pm.response.json().erro).to.eql('Cálculo duplicado'));"
-          ] } }]
-        },
-        {
-          "name": "Número fora do limite - 422 Unprocessable Content",
-          "request": { "method": "POST", "header": [], "auth": { "type": "basic", "basic": [{ "key": "username", "value": "usuario", "type": "string" }, { "key": "password", "value": "123", "type": "string" }] }, "url": "{{baseUrl}}/historico?numero1=1000001&numero2=2&operacao=SOMA" },
-          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
-            "pm.test('Status 422', () => pm.response.to.have.status(422));",
-            "pm.test('Erro informa o limite', () => pm.expect(pm.response.json().erro).to.eql('Número fora do limite'));"
-          ] } }]
-        },
-        {
-          "name": "Buscar cálculo criado - 200 OK",
-          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/historico/{{calculoId}}" },
-          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
-            "pm.test('Status 200', () => pm.response.to.have.status(200));",
-            "pm.test('ID é o mesmo cálculo criado', () => pm.expect(pm.response.json().id).to.eql(Number(pm.collectionVariables.get('calculoId'))));"
-          ] } }]
-        },
-        {
-          "name": "Editar cálculo como usuário comum - 403 Forbidden",
-          "request": { "method": "PUT", "header": [], "auth": { "type": "basic", "basic": [{ "key": "username", "value": "usuario", "type": "string" }, { "key": "password", "value": "123", "type": "string" }] }, "url": "{{baseUrl}}/historico/{{calculoId}}?numero1=9&numero2=3&operacao=MULTIPLICACAO" },
-          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 403', () => pm.response.to.have.status(403));"] } }]
-        },
-        {
-          "name": "Editar cálculo como admin - 200 OK",
-          "request": { "method": "PUT", "header": [], "auth": { "type": "basic", "basic": [{ "key": "username", "value": "admin", "type": "string" }, { "key": "password", "value": "123", "type": "string" }] }, "url": "{{baseUrl}}/historico/{{calculoId}}?numero1=9&numero2=3&operacao=MULTIPLICACAO" },
-          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
-            "pm.test('Status 200', () => pm.response.to.have.status(200));",
-            "pm.test('Resultado atualizado para 27', () => pm.expect(pm.response.json().resultado).to.eql(27));"
-          ] } }]
-        },
-        {
-          "name": "Excluir cálculo como usuário comum - 403 Forbidden",
-          "request": { "method": "DELETE", "header": [], "auth": { "type": "basic", "basic": [{ "key": "username", "value": "usuario", "type": "string" }, { "key": "password", "value": "123", "type": "string" }] }, "url": "{{baseUrl}}/historico/{{calculoId}}" },
-          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 403', () => pm.response.to.have.status(403));"] } }]
-        },
-        {
-          "name": "Excluir cálculo criado - 204 No Content",
-          "request": { "method": "DELETE", "header": [], "auth": { "type": "basic", "basic": [{ "key": "username", "value": "admin", "type": "string" }, { "key": "password", "value": "123", "type": "string" }] }, "url": "{{baseUrl}}/historico/{{calculoId}}" },
-          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
-            "pm.test('Status 204', () => pm.response.to.have.status(204));",
-            "pm.test('Resposta não possui corpo', () => pm.expect(pm.response.text()).to.eql(''));"
-          ] } }]
-        },
-        {
-          "name": "Excluir cálculo já removido - 404 Not Found",
-          "request": { "method": "DELETE", "header": [], "auth": { "type": "basic", "basic": [{ "key": "username", "value": "admin", "type": "string" }, { "key": "password", "value": "123", "type": "string" }] }, "url": "{{baseUrl}}/historico/{{calculoId}}" },
-          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 404', () => pm.response.to.have.status(404));"] } }]
-        },
-        {
-          "name": "Buscar cálculo inexistente - 404 Not Found",
-          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/historico/99999" },
-          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 404', () => pm.response.to.have.status(404));"] } }]
-        }
-      ]
-    },
-    {
-      "name": "Limite de requisições - 429",
+      "name": "05 - Limite de requisições e limpeza",
       "item": [
         {
           "name": "Criação 1 como usuário limitado - 201 Created",
-          "request": { "method": "POST", "header": [], "auth": { "type": "basic", "basic": [{ "key": "username", "value": "limitado", "type": "string" }, { "key": "password", "value": "123", "type": "string" }] }, "url": "{{baseUrl}}/historico?numero1=301&numero2=2&operacao=SOMA" },
-          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 201', () => pm.response.to.have.status(201));"] } }]
+          "request": {
+            "method": "POST",
+            "header": [],
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "limitado",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "123",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/historico?numero1={{limiteNumero1}}&numero2={{limiteNumero2Base}}&operacao=SOMA"
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "for (let i = 1; i <= 3; i++) pm.collectionVariables.unset('limiteId' + i);",
+                  "const base = 10000 + Math.floor(Math.random() * 889990);",
+                  "for (let i = 1; i <= 4; i++) pm.collectionVariables.set('limiteNumero' + i, base + i);",
+                  "pm.collectionVariables.set('limiteNumero2Base', 10000 + Math.floor(Math.random() * 890000));",
+                  "const ultimo = Number(pm.collectionVariables.get('limiteUltimaTentativa') || 0);",
+                  "const espera = ultimo ? Math.max(0, 61000 - (Date.now() - ultimo)) : 61000;",
+                  "if (espera > 0) { console.info('Aguardando janela do limite: ' + espera + ' ms'); setTimeout(() => {}, espera); }"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('limiteUltimaTentativa', String(Date.now()));",
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "if (pm.response.code === 201) pm.collectionVariables.set('limiteId1', String(pm.response.json().id));"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Criação 2 como usuário limitado - 201 Created",
-          "request": { "method": "POST", "header": [], "auth": { "type": "basic", "basic": [{ "key": "username", "value": "limitado", "type": "string" }, { "key": "password", "value": "123", "type": "string" }] }, "url": "{{baseUrl}}/historico?numero1=302&numero2=2&operacao=SOMA" },
-          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 201', () => pm.response.to.have.status(201));"] } }]
+          "request": {
+            "method": "POST",
+            "header": [],
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "limitado",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "123",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/historico?numero1={{limiteNumero2}}&numero2={{limiteNumero2Base}}&operacao=SOMA"
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.collectionVariables.get('limiteNumero2')) throw new Error('Execute primeiro a preparação desta pasta: falta limiteNumero2.');",
+                  "if (!pm.collectionVariables.get('limiteNumero2Base')) throw new Error('Execute primeiro a preparação desta pasta: falta limiteNumero2Base.');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('limiteUltimaTentativa', String(Date.now()));",
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "if (pm.response.code === 201) pm.collectionVariables.set('limiteId2', String(pm.response.json().id));"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Criação 3 como usuário limitado - 201 Created",
-          "request": { "method": "POST", "header": [], "auth": { "type": "basic", "basic": [{ "key": "username", "value": "limitado", "type": "string" }, { "key": "password", "value": "123", "type": "string" }] }, "url": "{{baseUrl}}/historico?numero1=303&numero2=2&operacao=SOMA" },
-          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 201', () => pm.response.to.have.status(201));"] } }]
+          "request": {
+            "method": "POST",
+            "header": [],
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "limitado",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "123",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/historico?numero1={{limiteNumero3}}&numero2={{limiteNumero2Base}}&operacao=SOMA"
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.collectionVariables.get('limiteNumero3')) throw new Error('Execute primeiro a preparação desta pasta: falta limiteNumero3.');",
+                  "if (!pm.collectionVariables.get('limiteNumero2Base')) throw new Error('Execute primeiro a preparação desta pasta: falta limiteNumero2Base.');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('limiteUltimaTentativa', String(Date.now()));",
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "if (pm.response.code === 201) pm.collectionVariables.set('limiteId3', String(pm.response.json().id));"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Criação 4 excede o limite - 429 Too Many Requests",
-          "request": { "method": "POST", "header": [], "auth": { "type": "basic", "basic": [{ "key": "username", "value": "limitado", "type": "string" }, { "key": "password", "value": "123", "type": "string" }] }, "url": "{{baseUrl}}/historico?numero1=304&numero2=2&operacao=SOMA" },
-          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
-            "pm.test('Status 429', () => pm.response.to.have.status(429));",
-            "pm.test('Retry-After é 60 segundos', () => pm.expect(pm.response.headers.get('Retry-After')).to.eql('60'));"
-          ] } }]
+          "request": {
+            "method": "POST",
+            "header": [],
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "limitado",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "123",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/historico?numero1={{limiteNumero4}}&numero2={{limiteNumero2Base}}&operacao=SOMA"
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.collectionVariables.get('limiteNumero4')) throw new Error('Execute primeiro a preparação desta pasta: falta limiteNumero4.');",
+                  "if (!pm.collectionVariables.get('limiteNumero2Base')) throw new Error('Execute primeiro a preparação desta pasta: falta limiteNumero2Base.');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('limiteUltimaTentativa', String(Date.now()));",
+                  "pm.test('Status 429', () => pm.response.to.have.status(429));",
+                  "pm.test('Retry-After é 60 segundos', () => pm.expect(pm.response.headers.get('Retry-After')).to.eql('60'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Excluir cálculo 1 do cenário de limite - 204",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/historico/{{limiteId1}}",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "admin",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "123",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.collectionVariables.get('limiteId1')) pm.execution.skipRequest();"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 204', () => pm.response.to.have.status(204));",
+                  "if (pm.response.code === 204) pm.collectionVariables.unset('limiteId1');"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Excluir cálculo 2 do cenário de limite - 204",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/historico/{{limiteId2}}",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "admin",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "123",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.collectionVariables.get('limiteId2')) pm.execution.skipRequest();"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 204', () => pm.response.to.have.status(204));",
+                  "if (pm.response.code === 204) pm.collectionVariables.unset('limiteId2');"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Excluir cálculo 3 do cenário de limite - 204",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/historico/{{limiteId3}}",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "admin",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "123",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.collectionVariables.get('limiteId3')) pm.execution.skipRequest();"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 204', () => pm.response.to.have.status(204));",
+                  "if (pm.response.code === 204) pm.collectionVariables.unset('limiteId3');"
+                ]
+              }
+            }
+          ]
         }
       ]
     },
     {
-      "name": "Cenários de erro",
+      "name": "06 - Persistência - Preparar antes do reinício",
       "item": [
         {
-          "name": "Excluir cálculo sem autenticação - 401 Unauthorized",
-          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/historico/{{calculoId}}" },
-          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 401', () => pm.response.to.have.status(401));"] } }]
+          "name": "Preparar cálculo persistente - 201",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/historico?numero1={{persistenciaNumero1}}&numero2={{persistenciaNumero2}}&operacao=DIVISAO",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "usuario",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "123",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.unset('persistenciaCalculoId');",
+                  "pm.environment.unset('persistenciaCalculoId');",
+                  "pm.collectionVariables.unset('persistenciaCalculoSnapshot');",
+                  "pm.environment.unset('persistenciaCalculoSnapshot');",
+                  "pm.collectionVariables.set('persistenciaNumero1', 10000 + Math.floor(Math.random() * 890000));",
+                  "pm.environment.set('persistenciaNumero1', pm.collectionVariables.get('persistenciaNumero1'));",
+                  "pm.collectionVariables.set('persistenciaNumero2', 10000 + Math.floor(Math.random() * 890000));",
+                  "pm.environment.set('persistenciaNumero2', pm.collectionVariables.get('persistenciaNumero2'));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "if (pm.response.code === 201) {",
+                  "    const body = pm.response.json();",
+                  "    const a = Number(pm.variables.get('persistenciaNumero1'));",
+                  "    const b = Number(pm.variables.get('persistenciaNumero2'));",
+                  "    pm.test('ID gerado pelo banco', () => pm.expect(body.id).to.be.a('number').and.above(0));",
+                  "    pm.test('Valores e operação corretos', () => {",
+                  "        pm.expect(body.numero1).to.eql(a);",
+                  "        pm.expect(body.numero2).to.eql(b);",
+                  "        pm.expect(body.operacao).to.eql('DIVISAO');",
+                  "        pm.expect(body.resultado).to.be.closeTo(a / b, 1e-9);",
+                  "    });",
+                  "    pm.test(\"Location corresponde ao ID\", () => pm.expect(pm.response.headers.get(\"Location\")).to.eql(\"/historico/\" + body.id));",
+                  "    pm.collectionVariables.set('persistenciaCalculoId', String(body.id));",
+                  "    pm.environment.set('persistenciaCalculoId', pm.collectionVariables.get('persistenciaCalculoId'));",
+                  "    pm.collectionVariables.set('persistenciaCalculoSnapshot', JSON.stringify(body));",
+                  "    pm.environment.set('persistenciaCalculoSnapshot', pm.collectionVariables.get('persistenciaCalculoSnapshot'));",
+                  "}"
+                ]
+              }
+            }
+          ]
         },
         {
-          "name": "Editar cálculo sem autenticação - 401 Unauthorized",
-          "request": { "method": "PUT", "header": [], "url": "{{baseUrl}}/historico/{{calculoId}}?numero1=9&numero2=3&operacao=MULTIPLICACAO" },
-          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 401', () => pm.response.to.have.status(401));"] } }]
+          "name": "Preparar pedido persistente - 202",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/pedidos?descricao={{persistenciaPedidoDescricao}}"
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.unset('persistenciaPedidoId');",
+                  "pm.environment.unset('persistenciaPedidoId');",
+                  "pm.collectionVariables.unset('persistenciaPedidoSnapshot');",
+                  "pm.environment.unset('persistenciaPedidoSnapshot');",
+                  "pm.collectionVariables.set('persistenciaPedidoDescricao', 'Postman-' + pm.variables.replaceIn('{{$guid}}'));",
+                  "pm.environment.set('persistenciaPedidoDescricao', pm.collectionVariables.get('persistenciaPedidoDescricao'));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 202', () => pm.response.to.have.status(202));",
+                  "if (pm.response.code === 202) {",
+                  "    const body = pm.response.json();",
+                  "    pm.test('Confirmação, fila e status corretos', () => {",
+                  "        pm.expect(body.mensagem).to.eql('Pedido recebido e enviado para processamento.');",
+                  "        pm.expect(body.fila).to.eql('pedidos');",
+                  "        pm.expect(body.status).to.eql('PENDING');",
+                  "        pm.expect(body.descricao).to.eql(pm.variables.get('persistenciaPedidoDescricao'));",
+                  "        pm.expect(body.id).to.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);",
+                  "    });",
+                  "    pm.collectionVariables.set('persistenciaPedidoId', body.id);",
+                  "    pm.environment.set('persistenciaPedidoId', pm.collectionVariables.get('persistenciaPedidoId'));",
+                  "}"
+                ]
+              }
+            }
+          ]
         },
         {
-          "name": "Editar cálculo inexistente como admin - 404 Not Found",
-          "request": { "method": "PUT", "header": [], "auth": { "type": "basic", "basic": [{ "key": "username", "value": "admin", "type": "string" }, { "key": "password", "value": "123", "type": "string" }] }, "url": "{{baseUrl}}/historico/99999?numero1=9&numero2=3&operacao=MULTIPLICACAO" },
-          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 404', () => pm.response.to.have.status(404));"] } }]
+          "name": "Aguardar processamento e guardar estado do pedido",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/pedidos/{{persistenciaPedidoId}}"
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.variables.get('persistenciaPedidoId')) throw new Error('Execute primeiro a preparação desta pasta: falta persistenciaPedidoId.');",
+                  "if (!pm.variables.get('persistenciaPedidoDescricao')) throw new Error('Execute primeiro a preparação desta pasta: falta persistenciaPedidoDescricao.');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const id = pm.variables.get('persistenciaPedidoId');",
+                  "const descricao = pm.variables.get('persistenciaPedidoDescricao');",
+                  "const url = pm.variables.replaceIn('{{baseUrl}}') + '/pedidos/' + id;",
+                  "function conferir(response, attempt) {",
+                  "    if (response.code !== 200) {",
+                  "        pm.test('Pedido existe no banco', () => pm.expect(response.code).to.eql(200));",
+                  "        return;",
+                  "    }",
+                  "    const body = response.json();",
+                  "    if (body.status === 'PENDING' && attempt < 20) {",
+                  "        setTimeout(() => pm.sendRequest(url, (error, next) => {",
+                  "            if (error) { pm.test('Consulta do pedido sem erro de conexão', () => pm.expect(error).to.eql(null)); return; }",
+                  "            conferir(next, attempt + 1);",
+                  "        }), 500);",
+                  "        return;",
+                  "    }",
+                  "    pm.test('Pedido processado pelo consumidor RabbitMQ', () => {",
+                  "        pm.expect(body.id).to.eql(id);",
+                  "        pm.expect(body.descricao).to.eql(descricao);",
+                  "        pm.expect(body.status).to.eql('PROCESSED');",
+                  "    });",
+                  "    if (body.status === 'PROCESSED') pm.collectionVariables.set('persistenciaPedidoSnapshot', JSON.stringify(body));",
+                  "    if (body.status === 'PROCESSED') pm.environment.set('persistenciaPedidoSnapshot', pm.collectionVariables.get('persistenciaPedidoSnapshot'));",
+                  "}",
+                  "conferir(pm.response, 0);"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "description": "Somente modoPersistencia=preparar. Mantém registros para conferir após reinício.",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (pm.variables.get('modoPersistencia') !== 'preparar') pm.execution.skipRequest();"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "07 - Persistência - Conferir após o reinício",
+      "item": [
+        {
+          "name": "Conferir cálculo após reinício - 200",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/historico/{{persistenciaCalculoId}}"
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.variables.get('persistenciaCalculoId')) throw new Error('Execute primeiro a preparação desta pasta: falta persistenciaCalculoId.');",
+                  "if (!pm.variables.get('persistenciaCalculoSnapshot')) throw new Error('Execute primeiro a preparação desta pasta: falta persistenciaCalculoSnapshot.');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) {",
+                  "    pm.test('Todos os dados persistidos correspondem ao registro salvo', () =>",
+                  "        pm.expect(pm.response.json()).to.deep.eql(JSON.parse(pm.variables.get('persistenciaCalculoSnapshot'))));",
+                  "}"
+                ]
+              }
+            }
+          ]
         },
         {
-          "name": "Criar cálculo sem autenticação - 401 Unauthorized",
-          "request": { "method": "POST", "header": [], "url": "{{baseUrl}}/historico?numero1=7&numero2=3&operacao=SOMA" },
-          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 401', () => pm.response.to.have.status(401));"] } }]
-        },
+          "name": "Conferir pedido após reinício - 200",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/pedidos/{{persistenciaPedidoId}}"
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.variables.get('persistenciaPedidoId')) throw new Error('Execute primeiro a preparação desta pasta: falta persistenciaPedidoId.');",
+                  "if (!pm.variables.get('persistenciaPedidoSnapshot')) throw new Error('Execute primeiro a preparação desta pasta: falta persistenciaPedidoSnapshot.');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) {",
+                  "    pm.test('Pedido preserva ID, descrição e status PROCESSED', () => {",
+                  "        pm.expect(pm.response.json()).to.deep.eql(JSON.parse(pm.variables.get('persistenciaPedidoSnapshot')));",
+                  "        pm.expect(pm.response.json().status).to.eql('PROCESSED');",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "description": "Somente modoPersistencia=verificar. Execute após reiniciar containers; nenhuma criação é feita nesta pasta.",
+      "event": [
         {
-          "name": "Parâmetro obrigatório ausente",
-          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/somar?numero1=10" },
-          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 400', () => pm.response.to.have.status(400));"] } }]
-        },
-        {
-          "name": "Parâmetro inválido",
-          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/somar?numero1=abc&numero2=5" },
-          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 400', () => pm.response.to.have.status(400));"] } }]
-        },
-        {
-          "name": "Divisão por zero",
-          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/dividir?numero1=10&numero2=0" },
-          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 400', () => pm.response.to.have.status(400));"] } }]
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (pm.variables.get('modoPersistencia') !== 'verificar') pm.execution.skipRequest();"
+            ]
+          }
         }
       ]
     }

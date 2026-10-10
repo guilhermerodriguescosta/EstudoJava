@@ -1,39 +1,51 @@
 package endpoint.service;
 
 import endpoint.config.RabbitMqConfig;
+import endpoint.repository.PedidoRepository;
 import endpoint.model.PedidoMensagem;
 import endpoint.model.PedidoStatus;
 import endpoint.model.PedidoStatusResponse;
 import org.junit.jupiter.api.Test;
+import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import java.util.UUID;
+import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 class PedidoFilaServiceTest {
+    private final RabbitTemplate rabbit = mock(RabbitTemplate.class);
+    private final PedidoRepository repository = mock(PedidoRepository.class);
+    private final PedidoFilaService service = new PedidoFilaService(rabbit, repository);
 
     @Test
-    void deveEnviarPedidoParaAFilaPedidos() {
-        RabbitTemplate rabbitTemplate = mock(RabbitTemplate.class);
-        PedidoFilaService pedidoFilaService = new PedidoFilaService(rabbitTemplate);
-
-        var id = pedidoFilaService.enviar("Pedido #7");
-
-        verify(rabbitTemplate).convertAndSend(RabbitMqConfig.FILA_PEDIDOS, new PedidoMensagem(id, "Pedido #7"));
-        assertEquals(PedidoStatus.PENDING, pedidoFilaService.buscarPorId(id).orElseThrow().status());
+    void deveSalvarAntesDePublicar() {
+        var id = service.enviar("Pedido #7");
+        var ordem = inOrder(repository, rabbit);
+        ordem.verify(repository).salvar(new PedidoStatusResponse(id, "Pedido #7", PedidoStatus.PENDING));
+        ordem.verify(rabbit).convertAndSend(RabbitMqConfig.FILA_PEDIDOS, new PedidoMensagem(id, "Pedido #7"));
     }
 
     @Test
-    void deveMarcarPedidoComoProcessado() {
-        PedidoFilaService pedidoFilaService = new PedidoFilaService(mock(RabbitTemplate.class));
-        var id = pedidoFilaService.enviar("Pedido #9");
+    void naoDevePublicarSeGravacaoFalhar() {
+        doThrow(new IllegalStateException("Banco indisponivel")).when(repository).salvar(any());
+        assertThrows(IllegalStateException.class, () -> service.enviar("Pedido"));
+        verifyNoInteractions(rabbit);
+    }
 
-        pedidoFilaService.marcarComoProcessado(id);
+    @Test
+    void devePropagarFalhaDePublicacao() {
+        doThrow(new AmqpException("Fila indisponivel")).when(rabbit)
+                .convertAndSend(eq(RabbitMqConfig.FILA_PEDIDOS), any(Object.class));
+        assertThrows(AmqpException.class, () -> service.enviar("Pedido"));
+        verify(repository).salvar(any());
+    }
 
-        PedidoStatusResponse pedido = pedidoFilaService.buscarPorId(id).orElseThrow();
-        assertEquals(PedidoStatus.PROCESSED, pedido.status());
-        assertTrue(pedidoFilaService.buscarPorId(java.util.UUID.randomUUID()).isEmpty());
+    @Test
+    void deveDelegarProcessamentoEConsulta() {
+        var id = UUID.randomUUID();
+        service.marcarComoProcessado(id);
+        service.buscarPorId(id);
+        verify(repository).marcarComoProcessado(id);
+        verify(repository).buscarPorId(id);
     }
 }

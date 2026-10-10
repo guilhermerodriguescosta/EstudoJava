@@ -10,8 +10,8 @@ import java.nio.charset.StandardCharsets;
 public class ProdutorPedidos {
 
     private static final String FILA_PEDIDOS = "pedidos";
-    private static final AMQP.BasicProperties MENSAGEM_PERSISTENTE =
-            new AMQP.BasicProperties.Builder().deliveryMode(2).build();
+    private static final AMQP.BasicProperties MENSAGEM_PERSISTENTE = new AMQP.BasicProperties.Builder()
+            .deliveryMode(2).build();
 
     public static void main(String[] args) throws Exception {
         ConnectionFactory factory = new ConnectionFactory();
@@ -20,17 +20,13 @@ public class ProdutorPedidos {
         factory.setPassword("app");
 
         try (Connection connection = factory.newConnection();
-             Channel channel = connection.createChannel()) {
+                Channel channel = connection.createChannel()) {
 
             channel.queueDeclare(FILA_PEDIDOS, true, false, false, null);
 
             String pedido = "Pedido #1 - notebook";
-            channel.basicPublish(
-                    "",
-                    FILA_PEDIDOS,
-                    MENSAGEM_PERSISTENTE,
-                    pedido.getBytes(StandardCharsets.UTF_8)
-            );
+            channel.basicPublish("", FILA_PEDIDOS, MENSAGEM_PERSISTENTE,
+                    pedido.getBytes(StandardCharsets.UTF_8));
 
             System.out.println("Pedido enviado: " + pedido);
         }
