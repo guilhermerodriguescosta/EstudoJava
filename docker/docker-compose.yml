@@ -4,7 +4,7 @@ services:
       context: ..
       dockerfile: docker/Dockerfile
     ports:
-      - "8080:8080"
+      - "127.0.0.1:8080:8080"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/estudojava
       SPRING_DATASOURCE_USERNAME: app
@@ -38,8 +38,8 @@ services:
   rabbitmq:
     image: rabbitmq:4-management
     ports:
-      - "5672:5672"
-      - "15672:15672"
+      - "127.0.0.1:5672:5672"
+      - "127.0.0.1:15672:15672"
     environment:
       RABBITMQ_DEFAULT_USER: app
       RABBITMQ_DEFAULT_PASS: app

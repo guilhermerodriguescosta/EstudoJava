@@ -63,6 +63,13 @@ Com Node e Newman disponíveis, na raiz do projeto:
 newman run postman/EstudoJava.postman_collection.json --iteration-count 2 --timeout-script 90000
 ```
 
+No Windows (PowerShell) e no macOS (Bash), com Node e npm, pode executar sem instalar Newman
+globalmente (uma execucao completa):
+
+```bash
+npx --yes newman run postman/EstudoJava.postman_collection.json --timeout-script 90000
+```
+
 O timeout de scripts permite a espera do cenário 429. Falhas de conexão,
 status HTTP inesperados e pedidos que não foram processados devem continuar
 aparecendo como falhas, sem serem ignorados pela collection.

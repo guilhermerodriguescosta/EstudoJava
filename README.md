@@ -4,31 +4,108 @@ Aplicacao de estudo com Java 25 e Spring Boot. O historico de calculos e os
 pedidos ficam no PostgreSQL; usuarios de exemplo e limite de requisicoes
 continuam em memoria. A API e os formatos JSON permanecem iguais.
 
-## Executar localmente
+## Executar localmente no Windows e no macOS
 
-Inicie o Docker Desktop com containers Linux. Execute os comandos abaixo na
-raiz do projeto (`C:\Estudo\Java\EstudoJava`).
+O mesmo `pom.xml`, Dockerfile, Compose e configuracoes Java atendem aos dois
+sistemas. Use Docker Desktop com **containers Linux** e Docker Compose.
+Para executar tudo em containers, nao precisa instalar Java nem Maven no host.
+Para usar Maven, testes ou a IDE, instale JDK 25, configure `JAVA_HOME` e confira
+`java -version`. O Maven Wrapper baixa o Maven; use `mvnw.cmd` no Windows e
+`mvnw` no macOS. Configure a IDE com o mesmo JDK 25 do terminal.
 
-Para executar Java pela IDE ou Maven, suba apenas os servicos:
+No Windows, siga a [instalacao oficial do Docker Desktop](https://docs.docker.com/desktop/setup/install/windows-install/)
+e habilite o backend WSL 2 com containers Linux. Execute os comandos abaixo
+no PowerShell 5.1 ou superior, na raiz de seu checkout. No macOS, abra o Docker Desktop com
+`open -a Docker`. A [instalacao oficial para Mac](https://docs.docker.com/desktop/setup/install/mac-install/)
+tambem permite copiar o aplicativo para Applications; o script Bash encontra
+o executavel nesse local se ele ainda nao estiver no PATH.
+
+### Windows / PowerShell
 
 ```powershell
-docker compose -f docker/docker-compose.yml up -d --wait postgres rabbitmq
-.\mvnw.cmd spring-boot:run
+.\scripts\local.ps1 up       # PostgreSQL, RabbitMQ e API em containers
+.\scripts\local.ps1 test     # Suite completa via Maven Wrapper
+.\scripts\local.ps1 status   # Estado dos containers
+.\scripts\local.ps1 logs     # Logs da API (Ctrl+C encerra acompanhamento)
+.\scripts\local.ps1 db       # Terminal SQL do PostgreSQL
+.\scripts\local.ps1 down     # Parar containers preservando os dados
 ```
 
-Para executar tudo em containers:
+Se o PowerShell bloquear scripts locais, use uma politica limitada ao processo
+para executar o script do repositorio que voce revisou, sem alterar a politica
+permanente do Windows:
 
 ```powershell
-docker compose -f docker/docker-compose.yml up -d --build --wait
-docker compose -f docker/docker-compose.yml logs -f endpoint
+powershell.exe -NoProfile -ExecutionPolicy RemoteSigned -File .\scripts\local.ps1 up
 ```
 
-Use apenas uma instancia da aplicacao na porta 8080. Banco: `estudojava`,
-usuario: `app`, senha local: `app`. PostgreSQL esta publicado somente em
-`127.0.0.1:5432`. O JDBC usa `localhost` quando Java roda no Windows e
+### macOS / Bash
+
+```bash
+./scripts/local.sh up       # PostgreSQL, RabbitMQ e API em containers
+./scripts/local.sh test     # Suite completa via Maven Wrapper
+./scripts/local.sh status   # Estado dos containers
+./scripts/local.sh logs     # Logs da API (Ctrl+C encerra acompanhamento)
+./scripts/local.sh db       # Terminal SQL do PostgreSQL
+./scripts/local.sh down     # Parar containers preservando os dados
+```
+
+Se o checkout nao preservar a permissao de execucao, use
+`bash scripts/local.sh up` e `bash mvnw test`. O `.gitattributes` preserva
+finais de linha LF no Bash, Dockerfile e Compose, e CRLF em `mvnw.cmd`,
+independentemente do sistema usado para clonar.
+
+### Executar Java pelo terminal ou pela IDE
+
+Use apenas uma instancia da API na porta 8080. Os scripts `run` sobem
+PostgreSQL e RabbitMQ e executam Maven em primeiro plano; Ctrl+C encerra Java.
+Se a API estiver em container, execute `stop` antes de `run`:
+
+```powershell
+# Windows
+.\scripts\local.ps1 stop
+.\scripts\local.ps1 run
+```
+
+```bash
+# macOS
+./scripts/local.sh stop
+./scripts/local.sh run
+```
+
+Para depurar pela IDE, execute `deps` no script de seu sistema e inicie
+`endpoint.EndpointApplication` com JDK 25. Se precisar, execute `stop` antes.
+O Maven carrega o agente Mockito para os testes; use o runner Maven da IDE
+para aproveitar essa configuracao.
+
+### Conexoes e verificacao HTTP
+
+API: http://localhost:8080/hello. RabbitMQ Management:
+http://localhost:15672 (`app` / `app`). PostgreSQL: `localhost:5432`, banco
+`estudojava`, usuario e senha `app`. As portas ficam restritas a este
+computador. Se alguma ja estiver ocupada, pare a outra instancia.
+
+O JDBC usa `localhost` quando Java roda no host (Windows ou macOS) e
 `postgres` quando roda no Compose. URL, usuario e senha podem ser substituidos
 por `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME` e
 `SPRING_DATASOURCE_PASSWORD`. As credenciais de exemplo sao para estudo local.
+
+```powershell
+# Windows
+Invoke-RestMethod 'http://localhost:8080/hello'
+Invoke-RestMethod -Method Post -Uri 'http://localhost:8080/pedidos?descricao=EstudoPostgreSQL'
+```
+
+```bash
+# macOS
+curl --fail http://localhost:8080/hello
+curl --fail -u usuario:123 -X POST \
+  'http://localhost:8080/historico?numero1=41&numero2=2&operacao=SOMA'
+curl --fail -X POST 'http://localhost:8080/pedidos?descricao=EstudoPostgreSQL'
+```
+
+Consulte os IDs retornados em `/historico/{id}` e `/pedidos/{id}`.
+Repetir os mesmos numeros e operacao retorna 409; escolha outro par.
 
 ## Estudar a persistencia
 
@@ -90,7 +167,13 @@ registros. Dados que existiam somente em memoria nao sao importados.
 ## Testes e prova de reinicio
 
 ```powershell
-.\mvnw.cmd test
+# Windows
+.\scripts\local.ps1 test
+```
+
+```bash
+# macOS
+./scripts/local.sh test
 ```
 
 Os testes unitarios usam mocks. Os testes de persistencia e HTTP usam
@@ -99,6 +182,8 @@ o banco local `estudojava`. Docker deve estar disponivel para a suite completa.
 Os testes de persistencia isolam as tabelas entre cenarios e cobrem CRUD,
 duplicidade concorrente, rollback e falha de envio.
 
+Os exemplos PowerShell abaixo podem ser usados no Windows; no macOS, use
+`curl` nos mesmos endpoints e guarde os IDs retornados.
 Para demonstrar a persistencia, mantenha os IDs de `$calculo` e `$pedido`,
 espere o pedido ficar PROCESSED e execute:
 
