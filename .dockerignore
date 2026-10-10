@@ -1,6 +1,11 @@
 .git
+.github
+.gitignore
+.gitattributes
 .mvn
 .vscode
 target
 postman
+mvnw
+mvnw.cmd
 *.md
