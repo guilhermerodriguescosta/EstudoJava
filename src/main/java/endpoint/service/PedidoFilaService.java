@@ -35,7 +35,6 @@ public class PedidoFilaService {
     }
 
     public void marcarComoProcessado(UUID id) {
-        pedidoRepository.atualizarSeExistir(id, pedido -> new PedidoStatusResponse(pedido.id(),
-                pedido.descricao(), PedidoStatus.PROCESSED));
+        pedidoRepository.marcarComoProcessado(id);
     }
 }

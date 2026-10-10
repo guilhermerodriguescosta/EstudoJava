@@ -8,6 +8,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.springframework.context.annotation.Import;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -19,7 +22,15 @@ import endpoint.service.HistoricoCalculoService;
 
 @SpringBootTest(properties = "spring.rabbitmq.listener.simple.auto-startup=false")
 @AutoConfigureMockMvc
+@Import(PostgresTestConfiguration.class)
 class EndpointApplicationTests {
+    @Autowired
+    private JdbcTemplate jdbc;
+
+    @BeforeEach
+    void limparBanco() {
+        jdbc.execute("TRUNCATE TABLE calculos, pedidos RESTART IDENTITY");
+    }
     @Autowired
     private MockMvc mockMvc;
     @Autowired
