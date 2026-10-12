@@ -216,6 +216,14 @@ Confirme que os valores do calculo e o status do pedido continuam iguais.
 Se Java estiver na IDE, reinicie-o e recrie apenas PostgreSQL e RabbitMQ.
 
 `docker compose -f docker/docker-compose.yml down` preserva volumes.
+
+A imagem da API inclui um `HEALTHCHECK` que consulta `/hello` a cada 30 segundos,
+com tolerancia inicial de 60 segundos e limite de tres falhas consecutivas.
+Confira o estado `healthy` ou `unhealthy` com `docker compose -f docker/docker-compose.yml ps`.
+Essa verificacao confirma a resposta HTTP da API; PostgreSQL e RabbitMQ possuem
+verificacoes proprias no Compose. Recrie a imagem com `./scripts/local.sh up`
+no macOS ou `.\scripts\local.ps1 up` no Windows para aplicar alteracoes no Dockerfile.
+
 **Adicionar `-v` apaga os volumes e os dados do PostgreSQL e RabbitMQ.**
 Nao remova os volumes durante a prova de persistencia.
 
