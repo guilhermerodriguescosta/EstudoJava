@@ -20,7 +20,10 @@ WORKDIR /app
 
 # Cria uma conta dedicada, sem shell de login e com UID/GID estáveis.
 # Usar identificadores numéricos também evita depender da resolução de nomes no runtime.
-RUN groupadd --system --gid 10001 app \
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && groupadd --system --gid 10001 app \
     && useradd --system --uid 10001 --gid app --home-dir /app --no-create-home \
         --shell /usr/sbin/nologin app
 
@@ -31,6 +34,10 @@ COPY --from=build --chown=10001:10001 /app/target/*.jar app.jar
 EXPOSE 8080
 
 USER 10001:10001
+
+# Verifica se a API responde; permite 60 segundos para a inicialização da aplicação.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
+    CMD curl --fail --silent --show-error --max-time 3 http://127.0.0.1:8080/hello || exit 1
 
 # Define o comando executado automaticamente quando um container desta imagem é iniciado.
 ENTRYPOINT ["java", "-jar", "app.jar"]
