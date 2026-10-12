@@ -20,7 +20,8 @@ import endpoint.model.Operacao;
 import endpoint.model.ResultadoOperacao;
 import endpoint.service.HistoricoCalculoService;
 
-@SpringBootTest(properties = "spring.rabbitmq.listener.simple.auto-startup=false")
+@SpringBootTest(properties = {"spring.rabbitmq.listener.simple.auto-startup=false",
+        "APP_USER_PASSWORD=123", "APP_ADMIN_PASSWORD=123", "APP_LIMITED_PASSWORD=123"})
 @AutoConfigureMockMvc
 @Import(PostgresTestConfiguration.class)
 class EndpointApplicationTests {

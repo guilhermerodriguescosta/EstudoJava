@@ -9,3 +9,8 @@ postman
 mvnw
 mvnw.cmd
 *.md
+
+# Credenciais locais
+.env
+.env.*
+!.env.example

@@ -20,6 +20,24 @@ no PowerShell 5.1 ou superior, na raiz de seu checkout. No macOS, abra o Docker 
 tambem permite copiar o aplicativo para Applications; o script Bash encontra
 o executavel nesse local se ele ainda nao estiver no PATH.
 
+### Senhas locais da API
+
+Antes de iniciar, copie `.env.example` para `.env` na raiz do repositorio
+(`cp .env.example .env` no macOS ou `Copy-Item .env.example .env` no PowerShell)
+e preencha as tres variaveis com senhas fortes e diferentes.
+O `.env` fica fora do Git e do build Docker. Nao compartilhe esse arquivo.
+
+Spring Boot carrega o `.env` ao executar na raiz do projeto, inclusive pela IDE;
+configure a pasta de trabalho da IDE para a raiz. Tambem e possivel fornecer
+`APP_USER_PASSWORD`, `APP_ADMIN_PASSWORD` e `APP_LIMITED_PASSWORD` diretamente
+como variaveis de ambiente, que prevalecem sobre o arquivo. O Compose injeta
+as variaveis do `.env` no container da API. Senhas ausentes ou vazias impedem
+a inicializacao. As contas usam BCrypt em memoria.
+
+O comando `curl -u usuario` pede a senha interativamente: use o valor de
+`APP_USER_PASSWORD`. Os testes usam credenciais exclusivas de teste e nao
+precisam das senhas locais.
+
 ### Windows / PowerShell
 
 ```powershell
@@ -99,7 +117,7 @@ Invoke-RestMethod -Method Post -Uri 'http://localhost:8080/pedidos?descricao=Est
 ```bash
 # macOS
 curl --fail http://localhost:8080/hello
-curl --fail -u usuario:123 -X POST \
+curl --fail -u usuario -X POST \
   'http://localhost:8080/historico?numero1=41&numero2=2&operacao=SOMA'
 curl --fail -X POST 'http://localhost:8080/pedidos?descricao=EstudoPostgreSQL'
 ```
@@ -120,7 +138,7 @@ Repetir os mesmos numeros e operacao retorna 409; escolha outro par.
    um ID inexistente nao cria registro. Duplicidade retorna HTTP 409.
 4. Salve um calculo, consulte-o, atualize-o e exclua-o. Observe as linhas no
    banco depois de cada chamada. Os usuarios de estudo sao `usuario`,
-   `admin` e `limitado`, todos com senha `123`; atualizar e excluir exige admin.
+   `admin` e `limitado`, com as senhas do `.env`; atualizar e excluir exige admin.
 5. Envie um pedido e acompanhe `PENDING` mudar para `PROCESSED` pelo consumidor.
 
 ```powershell

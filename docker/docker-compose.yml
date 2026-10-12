@@ -5,6 +5,8 @@ services:
       dockerfile: docker/Dockerfile
     ports:
       - "127.0.0.1:8080:8080"
+    env_file:
+      - ../.env
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/estudojava
       SPRING_DATASOURCE_USERNAME: app

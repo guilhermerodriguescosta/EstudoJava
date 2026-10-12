@@ -1,5 +1,8 @@
 package endpoint.config;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -24,10 +27,22 @@ public class SecurityConfig {
     }
 
     @Bean
-    UserDetailsService usuarios() {
+    PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    UserDetailsService usuarios(
+            PasswordEncoder encoder,
+            @Value("${APP_USER_PASSWORD}") String senhaUsuario,
+            @Value("${APP_ADMIN_PASSWORD}") String senhaAdmin,
+            @Value("${APP_LIMITED_PASSWORD}") String senhaLimitado) {
+        if (senhaUsuario.isBlank() || senhaAdmin.isBlank() || senhaLimitado.isBlank()) {
+            throw new IllegalArgumentException("Configure senhas nao vazias para as tres contas.");
+        }
         return new InMemoryUserDetailsManager(
-                User.withUsername("usuario").password("{noop}123").roles("USER").build(),
-                User.withUsername("admin").password("{noop}123").roles("ADMIN").build(),
-                User.withUsername("limitado").password("{noop}123").roles("USER").build());
+                User.withUsername("usuario").password(encoder.encode(senhaUsuario)).roles("USER").build(),
+                User.withUsername("admin").password(encoder.encode(senhaAdmin)).roles("ADMIN").build(),
+                User.withUsername("limitado").password(encoder.encode(senhaLimitado)).roles("USER").build());
     }
 }

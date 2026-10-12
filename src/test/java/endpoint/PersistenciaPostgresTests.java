@@ -23,7 +23,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-@SpringBootTest(properties = "spring.rabbitmq.listener.simple.auto-startup=false")
+@SpringBootTest(properties = {"spring.rabbitmq.listener.simple.auto-startup=false",
+        "APP_USER_PASSWORD=123", "APP_ADMIN_PASSWORD=123", "APP_LIMITED_PASSWORD=123"})
 @Import(PostgresTestConfiguration.class)
 class PersistenciaPostgresTests {
     @Autowired CalculoRepository calculos;
